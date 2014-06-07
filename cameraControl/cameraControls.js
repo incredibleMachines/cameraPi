@@ -2,7 +2,7 @@ var spawn = require('child_process').spawn
 var restler = require('restler');
 var fs = require('fs')
 
-var downloadURL = "http://169.254.225.128:3000"
+var downloadURL = "http://169.254.225.128:3001"
 
 
 var tethered = spawn('gphoto2', ['--capture-tethered'])
@@ -60,8 +60,11 @@ function handleFile(filename){
             "image": restler.file(filename, null, stats.size, null, "image/jpg")
         }
     }).on("complete", function(data) {
-        console.log(data)
+        console.log("Received: "+data)
         //delete file
+        fs.unlink(filename, function(e){
+          console.log("Deleted :"+filename)
+      	})
     });
   });
 

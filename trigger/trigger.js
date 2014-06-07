@@ -21,6 +21,12 @@ wss.on('connection',function(socket){
   })
   socket.on("close",function(message){
     console.log('Socket Disconnect '+connection.address)
+    for(var i in connectedDevices){
+      if(connection.address==connectedDevices.address){
+        connectedDevices.slice(i)
+        break
+      }
+    }
   })
 })
 
