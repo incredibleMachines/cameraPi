@@ -1,5 +1,7 @@
 *.img
 *.dmg
+*.jpg
 
 node_modules/
 .DS_Store
+
