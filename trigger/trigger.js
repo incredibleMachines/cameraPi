@@ -7,18 +7,21 @@ var connectedDevices = []
 wss.on('connection',function(socket){
   //var address = socket.handshake.address;
   //console.log(socket)
+  var connection;
   console.log("New Socket Connection: ")
   socket.on('message',function(message){
     //console.log(message)
     var data = JSON.parse(message)
     if(data.hasOwnProperty('address')){
       console.log("IP Address "+ data.address)
-      connectedDevices.push({address:data.address, id:data.address.replace(/\./g,''), socket:socket})
+      connection = {address:data.address,id:data.address.replace(/\./g,'')}
+      connectedDevices.push({address:connection.address, id:connection.id, socket:socket})
       connectedDevices.sort(function(a,b){ return a.id - b.id })
     }
   })
-
-  //socket.on("")
+  socket.on("close",function(message){
+    console.log('Socket Disconnect '+connection.address)
+  })
 })
 
 
@@ -34,7 +37,7 @@ wss.broadcast = function(data) {
     // }
 
       for(var i in this.clients)
-      this.clients[i].send(data)
+        this.clients[i].send(data)
 };
 
 

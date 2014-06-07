@@ -5,7 +5,8 @@ var os = require('os')
 var fs = require('fs')
 
 var ws = new WebSocket('ws://169.254.225.128:1234');
-var exec = require('child_process').exec
+//var exec = require('child_process').exec
+var spawn = require('child_process').spawn
 
 var gpioOpen = false
 
@@ -59,7 +60,6 @@ ws.on('message', function(data, flags) {
       setTimeout(function(){
          state=false
          writeLow(PIN1)
-         downloadImages()
        },300)
     }
   }else if(data == 'close'){
@@ -89,24 +89,6 @@ function writeLow(pin) {
     // });
 }
 
-function downloadImages(){
-  console.log("Attempting Download")
-  writeHigh(PIN2)
-  var child = exec('gphoto2 --get-all-files',function(error,stdout,stderr){
-    console.log("stdout: "+stdout)
-    if(stderr) console.error(stderr)
-    if(error) console.error(error)
-
-    fs.readdir('.',function(err,files){
-      if(err) console.error(err)
-      console.log(files)
-
-      //then delete all the files from the camera
-      //then send all the files to the server
-
-    })
-  })
-}
 
 process.on('SIGINT', function() {
 
