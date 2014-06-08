@@ -1,10 +1,23 @@
 <% /* SCENES SINGLE PAGE */ %>
 <% include includes/header %>
+<form id= "camera-settings">
+
 <% for (var i=0;i<settings.length;i++){%>
-
-<p><%= settings[i].call%></p>
-
+<strong><%= settings[i].name%></strong>
+<% if(settings[i].options){%>
+<select>
+<% for (var j=0;j<settings[i].options.length;j++){%>
+  <option value=<%=j%>
+  <%if (j==settings[i].value)
+  {%>
+  <%="selected"%>
+  <%}%>>
+  <%=settings[i].options[j].name%></option>
+<%}}%>
+</select>
+</br>
 <%}%>
 
+</form>
 
 <% include includes/footer %>
