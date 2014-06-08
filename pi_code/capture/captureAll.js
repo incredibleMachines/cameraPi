@@ -7,23 +7,32 @@
   - all RGB LED OUTPUT pins
   - small LED OUTPUT pin
   - Laser INPUT pin
+
+  - NO WEBSOCKET CONNECTIONS. ALL COMMENTED OUT //************
 */
 
-// var Gpio = require('onoff').Gpio,
-//     led = new Gpio(17, 'out'),
-//     button = new Gpio(18, 'in', 'both');
-//
-// button.watch(function(err, value) {
-//     led.writeSync(value);
-// });
 
 var Gpio = require('onoff').Gpio;
-var WebSocket = require('ws')
+// var WebSocket = require('ws') //************
 var os = require('os')
 var fs = require('fs')
+var exec = require('child_process').exec
+// var ws = new WebSocket('ws://169.254.233.80:1234');//***********
 
-var spawn = require('child_process').spawn
-var ws = new WebSocket('ws://169.254.174.240:1234');
+//all should be configured to OUT except for pin 23.
+var PIN = [23, 4, 17, 24, 27, 25];
+
+for(var i=0; i<PIN.length; i++){
+  var strExec; //string to execute
+  if(i<1) strExec = 'gpio export '+PIN[i]+ ' in';
+  else strExec = 'gpio export '+PIN[i]+ ' out';
+
+  var child = exec(strExec,function(error,stdout,stderr){
+    if(error) console.log("GPIO ERROR: "+error);
+  })
+}
+
+
 
 //*** VARS
 var groupLeader = true;
@@ -32,54 +41,59 @@ var triggerBufferTime = 1500; //how long to wait before next trigger
 
 
 //*** PINS
-var PIN_SHUTTER   = new Gpio(7, 'out');
-var PIN_AF        = new Gpio(11, 'out');
-var PIN_LED_RED   = new Gpio(18, 'out');
-var PIN_LED_GRN   = new Gpio(13, 'out');
-var PIN_LED_BLUE  = new Gpio(22, 'out');
-var PIN_LASER     = new Gpio(16, 'in', 'rising');//'both');
+var PIN_LASER     = new Gpio(PIN[0], 'in', 'rising');//'both');
+var PIN_SHUTTER   = new Gpio(PIN[1], 'out');
+var PIN_AF        = new Gpio(PIN[2], 'out');
+var PIN_LED_RED   = new Gpio(PIN[3], 'out');
+var PIN_LED_GRN   = new Gpio(PIN[4], 'out');
+var PIN_LED_BLUE  = new Gpio(PIN[5], 'out');
+
+
 var standbyLed    = PIN_LED_BLUE;
-configLaser(groupLeader); //start watching if leader
+setTimeout(function(){
+   configLaser(groupLeader); //config as default
+ },1000); //wait a second for Gpio(pin) to config first
 
 
-var networkInterfaces = os.networkInterfaces()
-console.log(networkInterfaces)
 
-var ipAddress = '';
-if(networkInterfaces.hasOwnProperty('eth0')){
-  ipAddress = networkInterfaces.eth0[0].address
-}else{
-  ipAddress = 'undefined'
-}
+// var networkInterfaces = os.networkInterfaces() //*************
+// console.log(networkInterfaces)
+//
+// var ipAddress = '';
+// if(networkInterfaces.hasOwnProperty('eth0')){
+//   ipAddress = networkInterfaces.eth0[0].address
+// }else{
+//   ipAddress = 'undefined'
+// }
 
 //** OPEN WEBSOCKET **
-ws.on('open', function() {
-  var obj = {'address':ipAddress}
-  console.log(obj)
-  ws.send(JSON.stringify(obj));
-});
-
-
-//** WEBSOCKET MESSAGE HANDLING **
-ws.on('message', function(data, flags) {
-  if(data == 'go'){
-    console.log(data)
-    // flags.binary will be set if a binary data is received
-    // flags.masked will be set if the data was masked
-    hitShutter();
-  }
-
-  else if(data == 'close'){
-    var child = exec('echo raspberry | sudo shutdown -h now',function(error,stdout,stderr){
-      console.log('stdout: '+stdout)
-      console.log('stderr: '+stderr)
-    })
-  }
-
-  else if(data == 'toggleleader'){
-    configLaser(!groupLeader);
-  }
-});
+// ws.on('open', function() {  //************************
+//   var obj = {'address':ipAddress}
+//   console.log(obj)
+//   ws.send(JSON.stringify(obj));
+// });
+//
+//
+// //** WEBSOCKET MESSAGE HANDLING **
+// ws.on('message', function(data, flags) {
+//   if(data == 'go'){
+//     console.log(data)
+//     // flags.binary will be set if a binary data is received
+//     // flags.masked will be set if the data was masked
+//     hitShutter();
+//   }
+//
+//   else if(data == 'close'){
+//     var child = exec('echo raspberry | sudo shutdown -h now',function(error,stdout,stderr){
+//       console.log('stdout: '+stdout)
+//       console.log('stderr: '+stderr)
+//     })
+//   }
+//
+//   else if(data == 'toggleleader'){
+//     configLaser(!groupLeader);
+//   }
+// });
 
 
 function configLaser(job){
@@ -90,7 +104,7 @@ function configLaser(job){
 
     //** set watch with callback on laserpin RISING
     PIN_LASER.watch(function(err, value) {
-        console.log("LASER TRIP RISING DETECTED");
+        //console.log("LASER TRIP RISING DETECTED");
         laserTriggered();
     });
 
@@ -114,16 +128,18 @@ function laserTriggered(){
   if(!triggerState){ //make sure we don't trigger a bunch of times in a row
     console.log("trip detected, triggering NOW");
     triggerState = true;
-    digitalWrite(PIN_LED_GRN, 1);
+    digitalWrite(PIN_LED_RED, 1);
     digitalWrite(standbyLed, 0);
 
     hitShutter(); //--- for now, toggle shutter pin. DEBUG only
 
     setTimeout(function(){
        triggerState = false; //reset trigger
-       digitalWrite(PIN_LED_GRN, 0);
+       digitalWrite(PIN_LED_RED, 0);
        digitalWrite(standbyLed, 1);
      },triggerBufferTime); //how long to wait between tiggers
+   } else {
+     console.log("trip detected during wait time");
    }
 }
 
@@ -142,7 +158,6 @@ function digitalWrite(pin, state){
   pin.write(state, function(err) { // Asynchronous write.
     //pin.write(value === 0 ? 1 : 0, function(err) {
       if (err) throw err;
-      //else console.log("pin "+pin+' set to '+state);
   });
 }
 

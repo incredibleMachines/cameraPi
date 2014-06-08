@@ -1,5 +1,5 @@
 {
-  "name": "CameraController",
+  "name": "laser",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -7,6 +7,6 @@
   },
   "dependencies": {
      "ws" : "0.4.x",
-	   "pi-gpio" : "*"
+	   "onoff" : "*"
   }
 }

@@ -1,37 +1,52 @@
 
 /*LASER.JS
 
-  socket commands -
+  Test to do ALL GPIO FUNCTIONALITY
 
-  -
-
+  - Laser INPUT pin
 */
-var gpio = require('pi-gpio');
-var WebSocket = require('ws')
+
+
+var Gpio = require('onoff').Gpio;
+var WebSocket = require('ws') //*******
 var os = require('os')
 var fs = require('fs')
-var spawn = require('child_process').spawn
+var exec = require('child_process').exec
+var ws = new WebSocket('ws://169.254.233.80:1234');//**********
 
-var ws = new WebSocket('ws://169.254.174.240:1234');
+//all should be configured to OUT except for pin 23.
+var PIN = [23, 24, 27, 25];
 
-//vars
-var groupLeader = true; //** if true, will read laser pin continuously **
-var pinsInited = false
-var gpioOpen = false
-var laserState = 0; // 0 = low/off . 1 = high/tripped
+for(var i=0; i<PIN.length; i++){
+  var strExec; //string to execute
+  if(i<1) strExec = 'gpio export '+PIN[i]+ ' in';
+  else strExec = 'gpio export '+PIN[i]+ ' out';
+
+  var child = exec(strExec,function(error,stdout,stderr){
+    if(error) console.log("GPIO ERROR: "+error);
+  })
+}
+
+
+//*** VARS
+var groupLeader = true;
 var triggerState = 0; //prevent false triggers
 var triggerBufferTime = 1500; //how long to wait before next trigger
-var readLaserRef = readLaser; //self-referencing function
 
-//PINS
-var PIN_SHUTTER = 7;
-var PIN_AF = 11;
-var PIN_LED_RED = 18;
-var PIN_LED_GRN = 22;
-var PIN_LED_BLUE = 13;
-var PIN_LASER = 16;
 
-var networkInterfaces = os.networkInterfaces()
+//*** PINS
+var PIN_LASER     = new Gpio(PIN[0], 'in', 'rising');//'both');
+var PIN_LED_RED   = new Gpio(PIN[3], 'out');
+var PIN_LED_GRN   = new Gpio(PIN[1], 'out');
+var PIN_LED_BLUE  = new Gpio(PIN[2], 'out');
+var standbyLed    = PIN_LED_GRN;
+
+setTimeout(function(){
+   configLaser(groupLeader); //config as default
+ },1000); //wait a second for Gpio(pin) to config first
+
+
+var networkInterfaces = os.networkInterfaces() //*************
 console.log(networkInterfaces)
 
 var ipAddress = '';
@@ -41,46 +56,18 @@ if(networkInterfaces.hasOwnProperty('eth0')){
   ipAddress = 'undefined'
 }
 
+// ** OPEN WEBSOCKET **
 ws.on('open', function() {
   var obj = {'address':ipAddress}
   console.log(obj)
   ws.send(JSON.stringify(obj));
 });
 
-//** configure OUTPUT pins **
-openGpioOutputPin(PIN_SHUTTER); //take out
-openGpioOutputPin(PIN_AF);      //take out
-openGpioOutputPin(PIN_LED_RED);
-openGpioOutputPin(PIN_LED_GRN);
-openGpioOutputPin(PIN_LED_BLUE);
-function openGpioOutputPin(pin){
-  gpio.open(pin, "output",function(err){
-    console.log('GPIO pin '+pin+' open')
-    digitalWrite(pin, 0); //write LOW
-    gpioOpen = true
-  });
-}
 
-//** configure input pin **
-gpio.open(PIN_LASER, "input", function(err){
-  console.log('GPIO pin '+PIN_LASER+' open')
-  gpioOpen = true;
-  pinsInited = true;
-  configLaser(groupLeader);
-});
-
-
+//** WEBSOCKET MESSAGE HANDLING **
 ws.on('message', function(data, flags) {
-  if(data == 'go'){
-    console.log(data)
-    // flags.binary will be set if a binary data is received
-    // flags.masked will be set if the data was masked
-    if(gpioOpen == true){
-      hitTrigger();
-    }
-  }
 
-  else if(data == 'close'){
+  if(data == 'close'){
     var child = exec('echo raspberry | sudo shutdown -h now',function(error,stdout,stderr){
       console.log('stdout: '+stdout)
       console.log('stderr: '+stderr)
@@ -92,67 +79,62 @@ ws.on('message', function(data, flags) {
   }
 });
 
-
+//** CONFIGURE LASER **
+//can be set through /toggleleader route currently
 function configLaser(job){
   groupLeader = job;
-  if(groupLeader){
+  digitalWrite(standbyLed, 0);
+
+  if(groupLeader){ //watch sensor!
+
+    //** set watch with callback on laserpin RISING
+    PIN_LASER.watch(function(err, value) {
+        //console.log("LASER TRIP RISING DETECTED");
+        laserTriggered();
+    });
     console.log(">> Running Laser.js, configured as GROUP LEADER <<");
-    readLaser();
+    standbyLed = PIN_LED_GRN;
   }
-  else console.log(">> Laser.js configured as GROUP MEMBER <<")
-  // if(groupLeader && pinsInited){
-  //     console.log("group leader AND pinsInited");
-  //    readLaser();
-  //  }
+
+  else{
+    PIN_LASER.unwatch(function(err){
+      if (err) throw err;
+    })
+    console.log(">> Laser.js configured as GROUP MEMBER <<")
+    standbyLed = PIN_LED_BLUE;
+  }
+
+  digitalWrite(standbyLed, 1); //standby LED on
 }
 
-
-//** function to read laser
-function readLaser(){
-    if(groupLeader){
-      gpio.read(PIN_LASER, function(err, value) {
-        if(err) throw err;
-        //console.log("reading laser. current value: " + value);
-        if(value && !laserState){ //so that we only hit trigger if it's a CHANGE in read value
-          hitTrigger();
-        }
-      });
-      setTimeout(function(){
-         readLaserRef();
-       },10); //how fast we want to be reading this laser
-   }
-}
 
 //** what to do when a laser trip is detected **
-function hitTrigger(){
+function laserTriggered(){
   if(!triggerState){ //make sure we don't trigger a bunch of times in a row
     console.log("trip detected, triggering NOW");
-    triggerState = true;
-    digitalWrite(PIN_LED_BLUE, 1);
 
-    hitShutter(); //--- for now, toggle shutter pin. DEBUG only
+    //TODO: SEND TRIGGER OBJECT TO SERVER HERE
+
+    triggerState = true;
+    digitalWrite(PIN_LED_RED, 1);
+    digitalWrite(standbyLed, 0);
 
     setTimeout(function(){
        triggerState = false; //reset trigger
-       digitalWrite(PIN_LED_BLUE, 0);
+       digitalWrite(PIN_LED_RED, 0);
+       digitalWrite(standbyLed, 1);
      },triggerBufferTime); //how long to wait between tiggers
+   } else {
+     console.log("trip detected during wait time");
    }
-}
-
-//** purely debug purposes
-//** TODO: remove me
-function hitShutter(){
-  digitalWrite(PIN_SHUTTER, 1);
-  setTimeout(function(){
-     digitalWrite(PIN_SHUTTER, 0);
-   },300); //shutter speed
 }
 
 
 //** digitalWrite function
 function digitalWrite(pin, state){
-  gpio.write(pin, state, function() {
-      console.log("pin "+pin+' set to '+state);
+  pin.write(state, function(err) { // Asynchronous write.
+    //pin.write(value === 0 ? 1 : 0, function(err) {
+      if (err) throw err;
   });
 }
 
@@ -160,9 +142,9 @@ function digitalWrite(pin, state){
 //** close on quit
 process.on('SIGINT', function() {
   console.log(' Got SIGINT closing gpio');
-  gpio.close(PIN_SHUTTER);
-  gpio.close(PIN_AF);
-  gpio.close(PIN_LASER);
+  digitalWrite(PIN_LED_GRN, 0);
+  digitalWrite(PIN_LED_RED, 0);
+  digitalWrite(PIN_LED_BLUE, 0);
   console.log(' Goodbye ');
   process.exit(0)
 })
