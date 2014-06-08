@@ -30,22 +30,23 @@ if(networkInterfaces.hasOwnProperty('eth0')){
   ipAddress = 'undefined'
 }
 
-http.get("http://localhost:8080/get?eosserialnumber", function(res) {
-  res.on('data', function (chunk) {
-    serialnumber = JSON.parse(chunk.toString())['eosserialnumber']
-    console.log('Camera Serial: '+serialnumber)
-    //console.log('BODY: ' + chunk);
-  });
-}).on('error', function(e) {
-  console.log("Got error: " + e.message);
-});
-
 ws.on('open', function() {
-  var obj = {'address':ipAddress, 'serial':serialnumber}
-  console.log(obj)
-  var objstring = JSON.stringify(obj)
-  ws.send(objstring);
-  newCameraPost(objstring)
+  http.get("http://localhost:8080/get?eosserialnumber", function(res) {
+    res.on('data', function (chunk) {
+      serialnumber = JSON.parse(chunk.toString())['eosserialnumber']
+      console.log('Camera Serial: '+serialnumber)
+      //console.log('BODY: ' + chunk);
+
+      var obj = {'address':ipAddress, 'serial':serialnumber}
+      console.log(obj)
+      var objstring = JSON.stringify(obj)
+      ws.send(objstring);
+      newCameraPost(objstring)
+
+    });
+  }).on('error', function(e) {
+    console.log("Got error: " + e.message);
+  });
 
 });
 
