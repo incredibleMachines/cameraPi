@@ -1,6 +1,7 @@
 *.img
 *.dmg
 *.jpg
+*.mov
 
 node_modules/
 .DS_Store

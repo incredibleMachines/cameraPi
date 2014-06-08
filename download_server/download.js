@@ -37,7 +37,7 @@ app.post('/',function(req,res){
   //console.log(image)
   var file = image.originalFilename.substr(0,image.originalFilename.indexOf('.'))
   //need to create unique image paths here
-  fs.rename(image.path,'images/'+file+'-'+imageCounter+'.jpg', function(err){
+  fs.rename(image.path,'images/'+req.connection.remoteAddress+'.jpg', function(err){
     imageCounter++;
     if(err) console.error(err)
     console.log('Image Saved.')

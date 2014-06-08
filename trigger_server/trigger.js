@@ -60,16 +60,25 @@ app.get('/sendsteps',function(req,res){
 
   for(var i in connectedDevices){
     setTimeout( function(client ){
-           client.socket.send( 'go' )
+      client.socket.send( 'go' )
     }(connectedDevices[i]), i*100)
   }
   res.jsonp({devices:connectedDevices})
 
 
 })
+
 app.get('/closeall',function(req,res){
   wss.broadcast('close')
   res.send('sending rpi close')
+})
+
+
+//--JUST FOR TESTING LASER READ
+app.get('/toggleleader',function(req,res){
+  //client.socket.send('readlaser');
+  wss.broadcast('toggleleader');
+  res.jsonp({set:'toggle laser leadership'}); //turn laser reading on and off
 })
 
 app.listen(3000);
