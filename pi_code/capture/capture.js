@@ -1,6 +1,12 @@
+//WEBSOCKET URL
+
+var websocket =''
+var browserapp = ''
+
 var gpio = require('pi-gpio');
 var WebSocket = require('ws')
 var os = require('os')
+var http = require('http')
 
 var fs = require('fs')
 
@@ -16,6 +22,7 @@ var PIN2 = 11
 var networkInterfaces = os.networkInterfaces()
 console.log(networkInterfaces)
 
+var serialNumber = ''
 var ipAddress = '';
 if(networkInterfaces.hasOwnProperty('eth0')){
   ipAddress = networkInterfaces.eth0[0].address
@@ -23,10 +30,23 @@ if(networkInterfaces.hasOwnProperty('eth0')){
   ipAddress = 'undefined'
 }
 
+http.get("http://localhost:8080/get?eosserialnumber", function(res) {
+  res.on('data', function (chunk) {
+    serialnumber = JSON.parse(chunk.toString())['eosserialnumber']
+    console.log('Camera Serial: '+serialnumber)
+    //console.log('BODY: ' + chunk);
+  });
+}).on('error', function(e) {
+  console.log("Got error: " + e.message);
+});
+
 ws.on('open', function() {
-  var obj = {'address':ipAddress}
+  var obj = {'address':ipAddress, 'serial':serialnumber}
   console.log(obj)
-  ws.send(JSON.stringify(obj));
+  var objstring = JSON.stringify(obj)
+  ws.send(objstring);
+  newCameraPost(objstring)
+
 });
 
 gpio.open(PIN1, "output",function(err){
@@ -70,7 +90,10 @@ ws.on('message', function(data, flags) {
   }
 });
 
-
+ws.on('close',function(){
+  //handle disconnect/attempt reconnect
+  console.log('disconnected')
+})
 
 function writeHigh(pin) {
     gpio.write(pin, 1, function() {
@@ -89,6 +112,24 @@ function writeLow(pin) {
     // });
 }
 
+function newCameraPost(objstring){
+  var options = {
+    host:browserapp,
+    port:80,
+    path:'/camera',
+    method:'POST',
+    headers:{
+    'Content-Type': 'application/json',
+    'Content-Length': objstring.length
+    }
+  }
+  // also send to browser computer
+  var req = http.request(options,function(res){
+
+  })
+  req.write(objstring)
+  req.end()
+}
 
 process.on('SIGINT', function() {
 
