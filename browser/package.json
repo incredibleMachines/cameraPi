@@ -1,0 +1,15 @@
+{
+  "name": "Browser",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+	   "ws" : "0.4.x",
+     "express":"3.4.0",
+     "underscore":"*",
+     "less-middleware": "0.1.x",
+    "ejs": "*"
+  }
+}
