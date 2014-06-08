@@ -13,7 +13,7 @@ var app = express();
 
 var settings=require( __dirname +'/routes/settings');
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 80);
 app.set('title', 'Camera Controller');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
