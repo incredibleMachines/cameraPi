@@ -28,15 +28,16 @@ app.use(express.session({secret: '!@#$%^&*()1234567890qwerty'}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
-app.get('/cameras/settings', settings.load(MasterSettings.settings,Database))
-app.post('/camera', settings.addCamera(Database))
-app.get('/camera', settings.addCamera(Database))
+app.get('/cameras/settings', settings.load(Database))
+app.post('/camera', settings.addCamera(MasterSettings.settings,Database))
+app.get('/camera', settings.addCamera(MasterSettings.settings,Database))
 app.get('/cameras/list', settings.displayCameras(Database))
 app.post('/cameras/save', settings.saveCamera(Database))
 app.post('/set', settings.saveSetting(Database))
 app.get('/cameras/select', settings.selectCamera())
 app.get('/arm', settings.armCameras(Database))
+app.get('/setupDB', settings.setupDB(MasterSettings.settings,Database))
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port').toString());
+	  console.log('Express server listening on port ' + app.get('port').toString());
 });

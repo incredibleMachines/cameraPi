@@ -1,5 +1,5 @@
-exports.settings = [
-  { name: 'Manual Focus', call: 'manualfocusdrive', value: 3, options: [{name:'Near 1'},{name:'Near 2'},{name:'Near 3'},{name:'None'},{name:'Far 1'},{name:'Far 2'},{name:'Far 3'}]},
+exports.settings = 
+  [{ name: 'Manual Focus', call: 'manualfocusdrive', value: 0, options: [{name:'Near 1'},{name:'Near 2'},{name:'Near 3'},{name:'None'},{name:'Far 1'},{name:'Far 2'},{name:'Far 3'}]},
   { name: 'Sync Date/Time', call: 'datetime', value: Math.round(new Date().getTime() / 1000) },
   { name: 'Quick Review', call: 'reviewtime', value: 0, options:[{name:'None'}, {name:'2 seconds'},{name: '4 seconds'},{name:'8 seconds'},{name:'Hold'}]},
   { name: 'EVF Mode', call: 'evfmode', value: 0, options:[{name:'0'},{name:'1'}]},
@@ -23,8 +23,8 @@ exports.settings = [
     { name: 'Shutter Speed', call: 'shutterspeed', value: 37, options:[{name:'bulb'},{name:'30'},{name:'25'},{name:'20'},{name:'15'},{name:'13'},{name:'10'},{name:'8'},{name:'6'},{name:'5'},{name:'4'},{name:'3.2'},{name:'2.5'},{name:'2'},{name:'1.6'},{name:'1.3'},{name:'1'},{name:'0.8'},{name:'0.6'},{name:'0.5'},{name:'0.4'},{name:'0.3'},{name:'1/4'},{name:'1/5'},{name:'1/6'},{name:'1/8'},{name:'1/10'},{name:'1/13'},{name:'1/15'},{name:'1/20'},{name:'1/25'},{name:'1/30'},{name:'1/40'},{name:'1/50'},{name:'1/60'},{name:'1/80'},{name:'1/100'},{name:'1/125'},{name:'1/160'},{name:'1/200'},{name:'1/250'},{name:'1/320'},{name:'1/400'},{name:'1/500'},{name:'1/640'},{name:'1/800'},{name:'1/1000'},{name:'1/1250'},{name:'1/1600'},{name:'1/2000'},{name:'1/2500'},{name:'1/3200'},{name:'1/4000'}] },
   { name: 'Metering Mode', call: 'meteringmode', value: 0, options:[{name:'Evaluative'},{name:'Partial'},{name:'Center-weighted average'} ]},
   { name: 'Bracket Mode', call: 'bracketmode', value: 0 },
-  { name: 'Aute Exposure Bracketing', call: 'aeb', value: 0, options:[{name:'off'},{name:'+/- 1/3'},{name:'+/- 2/3'},{name:'+/- 1'},{name:'+/- 1 1/3'},{name:'+/- 1 2/3'},{name:'+/- 2'}] }
-];
+  { name: 'Aute Exposure Bracketing', call: 'aeb', value: 0, options:[{name:'off'},{name:'+/- 1/3'},{name:'+/- 2/3'},{name:'+/- 1'},{name:'+/- 1 1/3'},{name:'+/- 1 2/3'},{name:'+/- 2'}]} ]
+
 
 exports.getDefaults=function(){
 	return settings;
