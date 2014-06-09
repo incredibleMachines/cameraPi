@@ -44,11 +44,9 @@ exports.addCamera = function (MongoDB){
 						console.log("new serial number found.")
 						camera={camera_id:'NULL',address:post.address,serial:post.serial}
 						MongoDB.add('cameras',camera, function(){
-							console.log("added to db!")
-							
+							console.log("added to db!")	
 						})
 					}
-					
 					else if(_data.length==1) {
 						if(_data[0].address==post.address){
 							console.log("camera found. no changes to record")
@@ -58,8 +56,7 @@ exports.addCamera = function (MongoDB){
 /* 							camera={camera_id:_data[0].id,address:post.address,serial:post.serial} */
 						MongoDB.update('cameras',{serial:post.serial},{$set: {address: post.address}}, function(e, _data) {
 							console.log("updated db!")
-						})
-							
+						})	
 						}
 					}
 					
@@ -68,7 +65,7 @@ exports.addCamera = function (MongoDB){
 					}
 				}
 				else{
-					message="ERROR";
+					message=e;
 				}
 		})
 	}
