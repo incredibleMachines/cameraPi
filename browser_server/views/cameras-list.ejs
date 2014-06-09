@@ -1,0 +1,21 @@
+<% include includes/header %>
+
+<% for (var i=0;i<cameras.length;i++){%>
+
+<form id="cameras-list" action="http://127.0.0.1:3000/cameras/save" method="post">
+
+<input type="hidden" name="address" value="<%= cameras[i].address%>"><div class="address">Address: <%= cameras[i].address%></div>
+
+<input type="hidden" name="serial" value="<%= cameras[i].serial%>"><div class="serial"> Serial: <%= cameras[i].serial %> </div>
+
+<div class="camera_id">
+
+<input type="text" name="camera_id" value="<%= cameras[i].camera_id %>"><input type="submit" value="Save"></div>
+
+
+</div>
+
+</form>
+<% } %>
+
+<% include includes/footer %>
