@@ -17,6 +17,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('title', 'Camera Controller');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
+app.set("jsonp callback", true);
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.methodOverride());
@@ -32,6 +33,7 @@ app.post('/cameras/add', settings.addCamera(Database))
 app.get('/cameras/add', settings.addCamera(Database))
 app.get('/cameras/list', settings.displayCameras(Database))
 app.post('/cameras/save', settings.saveCamera(Database))
+app.get('/arm', settings.armCameras(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port').toString());

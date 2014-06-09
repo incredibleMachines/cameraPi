@@ -1,4 +1,4 @@
-var master;
+var master, cameras;
 
 exports.load =  function(_settings){
 	master=_settings;
@@ -83,14 +83,26 @@ return function(req,res){
 
 exports.saveCamera = function (MongoDB){
 return function(req,res){
-				var post = req.body
-				console.log(post);
-				MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id}}, function(e, _data){
-					console.log("saved");
-					res.redirect('/cameras/list') 
-				})
+		var post = req.body
+		console.log(post)
+		MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id}}, function(e, _data){
+			console.log("saved")
+			res.redirect('/cameras/list') 
+		})
+	}
 }
+
+exports.armCameras = function (MongoDB){
+	return function(req,res){
+		var cameras=MongoDB.getAll('cameras', function(e, _data){
+			if(!e){
+				res.jsonp(_data)
+			}
+		})
+	}
 }
+
+
 
 function sortByKey(array, key) {
     return array.sort(function(a, b) {
