@@ -9,8 +9,7 @@ CAMERA.JS
 
 //**********************************//
 
-var HOST_IP = "192.168.0.2" //TRUE IP
-// var DOWNLOAD_IP = "192.168.0.42"
+var DOWNLOAD_IP = "192.168.0.2"
 var VERSION = "RC2.1" //
 
 //**********************************//
@@ -97,6 +96,19 @@ http.createServer(function (req, res) {
 
       res.end(JSON.stringify({"version":VERSION}));
 
+    }else if(url_parts.pathname =='/gitpull'){
+      child = exec('expect gitpull.sh',
+        function(error,stdout,stderr){
+                if(!error && !stderr){
+                        console.log(stdout)
+                        res.end(JSON.stringify({"Success":"Git Pull"}))
+
+                }else{
+                        console.log(error)
+                        console.log(stderr)
+                        res.end(JSON.stringify({"Error":"Git Pull"}))
+                }
+        })
     }else{
       res.end(JSON.stringify({error:"unrecognized"}))
       //console.log('restarting tethered')
