@@ -1,7 +1,7 @@
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({port:1234})
 var _ = require('underscore')
-var BROWSER_IP = 'http://10.0.1.28'//'192.168.0.4'
+var BROWSER_IP = 'http://192.168.0.4' //'http://10.0.1.28'//
 var http = require('http')
 
 var deviceList = []
