@@ -1,13 +1,22 @@
-var master, cameras;
+var master, cameras
+var currentCamera=001
+var selectAll=false
 
-exports.load =  function(_settings){
-	master=_settings;
-	return function(req, res){
-	    res.render('camera-settings', {
-		    settings: master,
-		    title: "Camera-Setting",
-		    header: "Camera Settings!"
-		})	
+exports.load =  function(_settings, MongoDB){
+	return function(req,res){
+	master=_settings
+	var cameras=MongoDB.getAll('cameras', function(e, _data){
+		if(!e){
+			_data=sortByKey(_data,'camera_id');
+		    res.render('camera-settings', {
+			    settings: master,
+			    cameras:_data,
+			    currentCamera:currentCamera,
+			    title: "Camera-Setting",
+			    header: "Camera Settings!"
+			})
+		}
+	})
 	}
 }
 
@@ -18,7 +27,7 @@ exports.addCamera = function (MongoDB){
 		console.log(post)
 		var camera
 		MongoDB.queryCollection('cameras',{serial:post.serial},function(e,_data){
-				console.log(_data);
+				console.log(_data)
 				if(!e){
 					if(_data.length==0){
 						message="new serial number found. added to db!"
@@ -101,6 +110,32 @@ exports.armCameras = function (MongoDB){
 		})
 	}
 }
+
+exports.selectCamera=function (){
+	return function(req,res){
+		var get=req.param('camera_id');
+		console.log(get)
+		currentCamera=get
+		res.redirect('/cameras/settings')
+	}
+}
+
+exports.saveSetting=function(MongoDB){
+	return function(req,res){
+		var post=req.body
+		console.log(post)
+		console.log(Object.keys(post))
+
+		MongoDB.queryCollection('cameras',{camera_id:currentCamera},function(e,_data){
+			if(!e){
+				console.log(_data);
+				console.log('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post.manualfocusdrive)
+				res.get('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post.manualfocusdrive)
+			}
+		})
+	}
+}
+
 
 
 

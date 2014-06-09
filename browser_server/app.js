@@ -22,17 +22,19 @@ app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.methodOverride());
 app.use(express.bodyParser());
-app.use(express.cookieParser('CamerControlApp'));
+app.use(express.cookieParser('CameraControlApp'));
 app.use( less( {src: __dirname+ '/public', force: true } ) );
 app.use(express.session({secret: '!@#$%^&*()1234567890qwerty'}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
-app.get('/cameras/settings', settings.load(MasterSettings.settings))
+app.get('/cameras/settings', settings.load(MasterSettings.settings,Database))
 app.post('/cameras/add', settings.addCamera(Database))
 app.get('/cameras/add', settings.addCamera(Database))
 app.get('/cameras/list', settings.displayCameras(Database))
 app.post('/cameras/save', settings.saveCamera(Database))
+app.post('/set', settings.saveSetting(Database))
+app.get('/cameras/select', settings.selectCamera())
 app.get('/arm', settings.armCameras(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
