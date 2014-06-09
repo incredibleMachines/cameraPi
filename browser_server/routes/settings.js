@@ -39,40 +39,37 @@ exports.addCamera = function (MongoDB){
 		console.log(post)
 		var camera
 		MongoDB.queryCollection('cameras',{serial:post.serial},function(e,_data){
-				console.log(_data)
 				if(!e){
 					if(_data.length==0){
-						message="new serial number found. added to db!"
+						console.log("new serial number found.")
 						camera={camera_id:'NULL',address:post.address,serial:post.serial}
-						MongoDB.add('cameras',camera, function(){})
+						MongoDB.add('cameras',camera, function(){
+							console.log("added to db!")
+							
+						})
 					}
 					
 					else if(_data.length==1) {
 						if(_data[0].address==post.address){
-							message="camera found. no changes to record"
-							camera={camera_id:_data[0].id,address:post.address,serial:post.serial}
+							console.log("camera found. no changes to record")
 						}
 						else{
-							message="camera found with new serial. updating db"
-							camera={camera_id:_data[0].id,address:post.address,serial:post.serial}
+							console.log("camera found with new address.")
+/* 							camera={camera_id:_data[0].id,address:post.address,serial:post.serial} */
+						MongoDB.update('cameras',{serial:post.serial},{$set: {address: post.address}}, function(e, _data) {
+							console.log("updated db!")
+						})
+							
 						}
 					}
 					
 					else{
-						message="identical serial numbers found in db"
-						camera={camera_id:'NULL',address:post.address,serial:post.serial}
+						console.log("identical serial numbers found in db")
 					}
 				}
 				else{
 					message="ERROR";
-					camera={camera_id:'NULL',address:post.address,serial:post.serial}
 				}
-				res.render('new-camera',{
-					camera:camera,
-					message:message,
-					title:"New-Camera",
-					header: "New Camera Ping"
-				})
 		})
 	}
 }
