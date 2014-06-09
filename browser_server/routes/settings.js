@@ -1,27 +1,44 @@
+
+var http = require('http');
+
 var master, cameras
 var currentCamera="all"
 var selectAll=true
 
+
 exports.load =  function(_settings, MongoDB){
 	return function(req,res){
 	var post=req.body
+	var currentAddress
+	var currentVal
 	master=_settings
 	current=master
 	if(selectAll==false){
+		MongoDB.queryCollection('cameras',{camera_id:currentCamera},function(e,_data){
+				if(!e){
+					currentAddress=_data[0].address
+
 		for(var i=0;i<current.length;i++){
-			var currentVal=res.get('http://'+currentCamera+'/get?'+current[i].call)
+			http.get('http://'+currentAddress+':8080/get?'+current[i].call, function(server){
+				console.log("Got response: " + server.statusCode);
+
+			}).on('error', function(e) {
+				console.log("Got error: " + e.message);
+			});
 			if(currentVal){
+				console.log("Loaded Settings From Camera")
 				current[i].value=currentVal
 			}
-			console.log('http://'+currentCamera+'/get?'+current[i].call)
+			console.log('http://'+currentAddress+':8080/get?'+current[i].call)
 			console.log(current[i].value)
 		}
+	}})
 	}
 	var cameras=MongoDB.getAll('cameras', function(e, _data){
 		if(!e){
-			_data=sortByKey(_data,'camera_id');	
+			_data=sortByKey(_data,'camera_id');
 		    res.render('camera-settings', {
-			    settings: master,
+			    settings: current,
 			    cameras:_data,
 			    currentCamera:currentCamera,
 			    title: "Camera-Setting",
@@ -44,7 +61,7 @@ exports.addCamera = function (MongoDB){
 						console.log("new serial number found.")
 						camera={camera_id:'NULL',address:post.address,serial:post.serial}
 						MongoDB.add('cameras',camera, function(){
-							console.log("added to db!")	
+							console.log("added to db!")
 						})
 					}
 					else if(_data.length==1) {
@@ -56,10 +73,10 @@ exports.addCamera = function (MongoDB){
 /* 							camera={camera_id:_data[0].id,address:post.address,serial:post.serial} */
 						MongoDB.update('cameras',{serial:post.serial},{$set: {address: post.address}}, function(e, _data) {
 							console.log("updated db!")
-						})	
+						})
 						}
 					}
-					
+
 					else{
 						console.log("identical serial numbers found in db")
 					}
@@ -102,7 +119,7 @@ return function(req,res){
 		console.log(post)
 		MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id}}, function(e, _data){
 			console.log("saved")
-			res.redirect('/cameras/list') 
+			res.redirect('/cameras/list')
 		})
 	}
 }
@@ -121,7 +138,7 @@ exports.selectCamera=function (){
 	return function(req,res){
 		var get=req.param('camera_id');
 		if(get=="all"){
-			selectAll=true	
+			selectAll=true
 		}
 		else{
 			selectAll=false
@@ -136,13 +153,21 @@ exports.saveSetting=function(MongoDB){
 	return function(req,res){
 	if(selectAll==false){
 		var post=req.body
+		console.log(post)
 		MongoDB.queryCollection('cameras',{camera_id:currentCamera},function(e,_data){
 			if(!e){
 				console.log(_data);
-				console.log('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post[0])
-				res.get('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post[0])
+				var key=Object.keys(post)[0]
+				console.log('http://'+_data[0].address+':8080/set?'+key+'='+post[key])
+				http.get('http://'+_data[0].address+':8080/set?'+key+'='+post[key], function(server){
+					console.log("Got response: " + res.statusCode);
+				}).on('error', function(e) {
+  				console.log("Got error: " + e.message);
+				});
+
 			}
 		})
+		res.redirect('/cameras/settings')
 	}
 	else{
 		var post=req.body
@@ -150,11 +175,17 @@ exports.saveSetting=function(MongoDB){
 			if(!e){
 				for(var i=0;i<_data.length;i++){
 					console.log(_data[i]);
-					console.log('http://'+_data[i].address+'/set?'+Object.keys(post)+'='+post[0])
-					res.get('http://'+_data[i].address+'/set?'+Object.keys(post)+'='+post[0])
+					var key=Object.keys(post)[0]
+					console.log('http://'+_data[0].address+':8080/set?'+key+'='+post[key])
+					http.get('http://'+_data[0].address+':8080/set?'+key+'='+post[key], function(server){
+						console.log("Got response: " + res.statusCode);
+					}).on('error', function(e) {
+						console.log("Got error: " + e.message);
+					});
 				}
 				}
 		})
+		res.redirect('/cameras/settings')
 	}
 	}
 }
