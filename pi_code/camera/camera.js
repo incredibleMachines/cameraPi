@@ -10,11 +10,12 @@ CAMERA.JS
 //**********************************//
 
 // TRUE HOST_IP = "192.168.0.2"
-var DOWNLOAD_IP = "192.168.0.2"//JOE: "192.168.0.42"
+var DOWNLOAD_IP = "192.168.0.42" // TRUE HOST_IP = "192.168.0.2"
 var VERSION = "RC2" //
 
 //**********************************//
 
+var Gpio = require('onoff').Gpio;
 var spawn = require('child_process').spawn;
 var exec  = require('child_process').exec;
 var restler = require('restler');
@@ -22,7 +23,22 @@ var fs = require('fs');
 var url = require('url');
 var downloadURL = "http://"+ DOWNLOAD_IP +":3001";
 
-var tether = new Tether()
+var PIN = [17]; // [AF, ?]
+
+//** EXPORT GPIO PINS
+for(var i=0; i<PIN.length; i++){
+  var strExec = 'gpio export '+PIN[i]+ ' out';
+  var child = exec(strExec,function(error,stdout,stderr){
+    if(error) console.log("GPIO ERROR: "+error);
+  })
+}
+
+//*** SETUP PINS
+var PIN_AF = new Gpio(PIN[0], 'out');
+console.log("AutoFocus pin inited");
+hitAutoFocus(); //give it a little nudge immediately
+
+var tether = new Tether();
 
 var http = require('http');
 http.createServer(function (req, res) {
@@ -70,7 +86,7 @@ http.createServer(function (req, res) {
             obj[keys[0]] =value
             res.end(JSON.stringify(obj))
           }else{
-
+            hitAutoFocus(); //wake up camera
             res.end(JSON.stringify({"error":stderr}))
           }
           //console.log('restarting tethered')
@@ -91,9 +107,14 @@ http.createServer(function (req, res) {
       tether.start()
     }
   }
-
 }).listen(8080);
 console.log('Server running at 8080');
+
+
+
+
+
+
 
 //*** TETHER TO CANON ****
 function Tether(){
@@ -136,8 +157,24 @@ function Tether(){
   this.kill = function(){
     _this.tethered.kill()
   }
-
   this.tethered = this.start()
+}
+
+
+//**** half-press for Auto-Focus
+function hitAutoFocus(){
+  digitalWrite(PIN_AF, 1);
+  setTimeout(function(){
+     digitalWrite(PIN_AF, 0);
+  },300); //button press duration
+}
+
+//** digitalWrite function
+function digitalWrite(pin, state){
+  pin.write(state, function(err) { // Asynchronous write.
+    //pin.write(value === 0 ? 1 : 0, function(err) {
+      if (err) throw err;
+  });
 }
 
 
