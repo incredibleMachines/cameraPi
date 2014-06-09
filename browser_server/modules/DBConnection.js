@@ -115,7 +115,7 @@ exports.update=function(_type,_what,_updateObj,_cb){
 //update a document by providing a mongodb ID string
 //_type = collection name
 //_id = string as mongo id
-//_updateObj = the update operation which needs to take place
+	//_updateObj = the update operation which needs to take place}
 //_cb = callback(err)
 exports.updateByID=function(_type,_id,_updateObj,_cb){
 
@@ -129,73 +129,6 @@ exports.updateByID=function(_type,_id,_updateObj,_cb){
 }
 
 
-
-//get all events and assets formatted for init command
-//async function which parses all events and assets and reorders them and sends them back to the socket
-//_cb=callback(err,_events[])
-exports.formatInit=function(_cb){
-	collection.timeline.find().toArray(function(e,_events){
-		if(!e){
-			if(_events.length>0){
-				var events_counter = 0;
-				var eventsToSend = []
-				_events.forEach(function(event,i){
-						if(event.slug == 'ambient'){
-							var thisEvent = {};
-							thisEvent.title= event.title;
-							thisEvent.duration= event.duration;
-							thisEvent.start_time= event.start_time;
-							thisEvent.slug=event.slug;
-							eventsToSend.push(thisEvent);
-
-							event.scenes.forEach(function(scene){
-
-								var thisEvent = {};
-								thisEvent.title= scene.title;
-								thisEvent.duration= scene.duration;
-								thisEvent.start_time= scene.start_time;
-								thisEvent.slug=scene.slug;
-								eventsToSend.push(thisEvent);
-
-							})
-
-						}else{
-						var thisEvent = {};
-						thisEvent.title= event.title;
-						thisEvent.duration= event.duration;
-						thisEvent.start_time= event.start_time;
-						thisEvent.slug=event.slug;
-						eventsToSend.push(thisEvent);
-					}
-
-					//console.log(i+' :: '+JSON.stringify(event))
-					/*if(event.scenes.length>0){
-						formatScenes(event._id,event.scenes,function(_err,_scenes){
-							_events[i].scenes=_scenes;
-							events_counter++;
-							if(events_counter==_events.length) _cb(null,_events)
-						})
-					}else{ //no assets
-						//console.log('EVENTS['+i+'] Contains No Assets');
-					   events_counter++;
-					   if(events_counter==_events.length){
-				   		//edge case - our last event doesn't have any assets
-				   		 _cb(null,_events);
-					   }
-					}*/
-				})
-				_cb(null, eventsToSend);
-			}else{//if(_events>0)
-				//console.error('No Events');
-				_cb({'error':'No Timeline created in Database'});
-			}
-		}else{ //if(!e)
-			//Handle Error
-			console.error(e);
-			_cb(e)
-		}
-	});
-}
 //get a mongo document by collection and slug string
 //_type = collection type
 //_slug = single slug
@@ -235,26 +168,3 @@ function makeMongoID(__id){
 	else return '';
 }
 
-//format asset
-
-function formatAsset(_asset,cb){
-	//console.log('formatting asset: '+JSON.stringify(_asset));
-	if(_asset.file!=''){
-		getDocumentByID('files',_asset.file,function(e,_file){
-			if(_file.location!=''){
-				getDocumentByID('locations',_file.location,function(_e,_loc){
-					_file.location = _loc;
-					_asset.file=_file;
-					cb(_asset)
-				})
-			}else{
-				_asset.file=_file;
-				cb(_asset)
-			}
-		})
-	}else{
-
-		cb(_asset)
-	}
-
-}

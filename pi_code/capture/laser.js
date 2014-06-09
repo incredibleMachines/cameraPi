@@ -7,12 +7,20 @@
 */
 
 
+//**********************************//
+
+//* TRUE HOST_IP: TODO:!
+var HOST_IP = "192.168.0.3" //JOE:"192.168.0.42"
+var PORT    = "1234"
+
+//**********************************//
+
 var Gpio = require('onoff').Gpio;
 var WebSocket = require('ws') //*******
 var os = require('os')
 var fs = require('fs')
 var exec = require('child_process').exec
-var ws = new WebSocket('ws://169.254.233.80:1234');//**********
+var ws = new WebSocket('ws://'+HOST_IP+':'+PORT);//**********
 
 //all should be configured to OUT except for pin 23.
 var PIN = [23, 24, 27, 25];
