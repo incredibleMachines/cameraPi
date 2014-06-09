@@ -28,6 +28,9 @@ var ipAddress = '';
 var websocket =''
 var browserapp = ''
 
+var hasIPAddress = false;
+var socketcounter =0;
+
 var PIN = [4, 17]; // [SHUTTER, AF]
 var picCt =0; //picture count
 
@@ -44,55 +47,76 @@ for(var i=0; i<PIN.length; i++){
 var PIN_SHUTTER   = new Gpio(PIN[0], 'out');
 var PIN_AF        = new Gpio(PIN[1], 'out');
 
-//*** SETUP NETWORK CONNECTION
-var networkInterfaces = os.networkInterfaces();
-console.log(networkInterfaces);
+getIPAddress(function(_ipAddress){
+    console.log('IP ADDRESS: '+_ipAddress)
+    if(!_ipAddress){ getIPAddress(arguments.callee)
+    }else if(_ipAddress.toString().indexOf('192.168.0')===-1){
+        getIPAddress(arguments.callee())
+    }else{
+      ipAddress = _ipAddress
+      connectSocket()
+    }
 
-if(networkInterfaces.hasOwnProperty('eth0')){
-  ipAddress = networkInterfaces.eth0[0].address;
-}else ipAddress = 'undefined';
+})
+//*** SETUP NETWORK CONNECTION
+function getIPAddress(cb){
+  var networkInterfaces = os.networkInterfaces();
+  console.log(networkInterfaces)
+  if(networkInterfaces.hasOwnProperty('eth0')){
+    if(networkInterfaces.eth0[0].hasOwnProperty('address')){
+      cb(networkInterfaces.eth0[0].address)
+    }else cb(null)
+  }else cb(null)
+  //ipAddress = networkInterfaces.eth0[0].address;
+}
 
 
 //*** OPEN WEBSOCKET
-ws.on('open', function() {
-  http.get("http://localhost:8080/get?eosserialnumber", function(res) {
-    res.on('data', function (chunk) {
-      serialnumber = JSON.parse(chunk.toString())['eosserialnumber']
-      console.log('Camera Serial: '+serialnumber)
-      //console.log('BODY: ' + chunk);
-      var obj = {'address':ipAddress, 'serial':serialnumber}
-      console.log(obj)
-      var objstring = JSON.stringify(obj)
-      ws.send(objstring);
-      newCameraPost(objstring)
+function connectSocket(){
+  if(socketCounter < 1){
+    socketCounter++
+    ws.on('open', function() {
+      http.get("http://localhost:8080/get?eosserialnumber", function(res) {
+        res.on('data', function (chunk) {
+          serialnumber = JSON.parse(chunk.toString())['eosserialnumber']
+          console.log('Camera Serial: '+serialnumber)
+          //console.log('BODY: ' + chunk);
+          var obj = {'address':ipAddress, 'serial':serialnumber}
+          console.log(obj)
+          var objstring = JSON.stringify(obj)
+          ws.send(objstring);
+          newCameraPost(objstring)
+        });
+      }).on('error', function(e) {
+        console.log("Got error: " + e.message);
+      });
     });
-  }).on('error', function(e) {
-    console.log("Got error: " + e.message);
-  });
-});
 
-ws.on('close',function(){
-  //handle disconnect/attempt reconnect
-  console.log('disconnected')
-})
-
-
-//*** HANDLE WEBSOCKET MESSAGES
-ws.on('message', function(data, flags) {
-  if(data == 'go'){
-    console.log("trigger shutter, count "+ (picCt++));
-    // flags.binary will be set if a binary data is received
-    // flags.masked will be set if the data was masked
-    hitShutter(); //*** TAKE PICTURE !!
-  }
-  else if(data == 'close'){
-    var child = exec('echo raspberry | sudo shutdown -h now',function(error,stdout,stderr){
-      console.log('stdout: '+stdout)
-      console.log('stderr: '+stderr)
+    ws.on('close',function(){
+      /** TO DO **/
+      //handle disconnect/attempt reconnect
+      socketCounter--
+      console.log('disconnected')
     })
-  }
-});
 
+
+    //*** HANDLE WEBSOCKET MESSAGES
+    ws.on('message', function(data, flags) {
+      if(data == 'go'){
+        console.log("trigger shutter, count "+ (picCt++));
+        // flags.binary will be set if a binary data is received
+        // flags.masked will be set if the data was masked
+        hitShutter(); //*** TAKE PICTURE !!
+      }
+      else if(data == 'close'){
+        var child = exec('echo raspberry | sudo shutdown -h now',function(error,stdout,stderr){
+          console.log('stdout: '+stdout)
+          console.log('stderr: '+stderr)
+        })
+      }
+    });
+  }
+}
 //**** TAKE A PICTURE !! ****
 function hitShutter(){
   digitalWrite(PIN_SHUTTER, 1);
