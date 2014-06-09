@@ -1,13 +1,26 @@
-var spawn = require('child_process').spawn
-var exec  = require('child_process').exec
-var restler = require('restler')
-var fs = require('fs')
-var url = require('url')
+/*
+CAMERA.JS
 
-var downloadURL = "http://169.254.225.128:3001"
+  - tethers to canon
+  - pulls, deletes img
+  -
 
-//var tether = startTether()
-//startTether()
+*/
+
+//**********************************//
+
+// TRUE HOST_IP = "192.168.0.2"
+var DOWNLOAD_IP = "192.168.0.2"//JOE: "192.168.0.42"
+var VERSION = "RC2" //
+
+//**********************************//
+
+var spawn = require('child_process').spawn;
+var exec  = require('child_process').exec;
+var restler = require('restler');
+var fs = require('fs');
+var url = require('url');
+var downloadURL = "http://"+ DOWNLOAD_IP +":3001";
 
 var tether = new Tether()
 
@@ -18,16 +31,13 @@ http.createServer(function (req, res) {
   var url_parts = url.parse(req.url, true);
   //console.log(url_parts)
   var query = url_parts.query;
-
   keys = Object.keys(url_parts.query)
   if(url_parts.pathname ==  '/favicon.ico'){
     res.writeHead(400,{'Content-Type':'application/json'})
     res.end('Not for you')
   }else{
-    //tether.kill()
     tether.kill()
     res.writeHead(200, {'Content-Type': 'application/json'})
-
 
     var response;
 
@@ -43,7 +53,6 @@ http.createServer(function (req, res) {
             res.end(JSON.stringify({"error":stderr}))
           }
           console.log('restarting tethered')
-          //startTether()
           tether.start()
         })
 
@@ -65,15 +74,20 @@ http.createServer(function (req, res) {
             res.end(JSON.stringify({"error":stderr}))
           }
           //console.log('restarting tethered')
-          //startTether()
           tether.start()
         })
 
-    }else{
+    }else if(url_parts.pathname == '/version'){
 
+      //TODO: IMMEDIATE: RETURN IMAGE VERSION NUMBER;
+      var RC = VERSION;
+
+
+
+
+    }else{
       res.end(JSON.stringify({error:"unrecognized"}))
       //console.log('restarting tethered')
-      //startTether()
       tether.start()
     }
   }
@@ -82,6 +96,7 @@ http.createServer(function (req, res) {
 console.log('Server running at 8080');
 
 
+//*** TETHER TO CANON ****
 function Tether(){
 
   /* TO DO BETTER RECONNECT STRATEGIES */
@@ -109,18 +124,14 @@ function Tether(){
         }else if(string.indexOf('*** Error ***')>-1){
           console.error(string)
         }
-
       })
-
       tethered.on('close',function(code){
         console.log('Closed Tethered with code: '+code)
       })
-
       this.kill = function(){
           console.log('killing tethering')
           tethered.kill("SIGHUP")
       }
-
       return tethered
   }
   this.kill = function(){
@@ -128,11 +139,10 @@ function Tether(){
   }
 
   this.tethered = this.start()
-
 }
 
 
-
+//**** HANDLE FILE ****
 function handleFile(filename){
   //delete file
   //pass file back to processing server

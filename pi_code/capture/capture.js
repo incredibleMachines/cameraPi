@@ -5,21 +5,32 @@
   - sends cameraPost to server after photo is taken
 */
 
+//**********************************//
+
+var BROWSER_IP = "192.168.0.4"
+var TRIGGER_IP = "192.168.0.3" //REAL:192.168.0.3 // JOE: "192.168.0.42
+var TRIGGER_PORT    = "1234"
+
+//**********************************//
+
 var Gpio = require('onoff').Gpio;
 var WebSocket = require('ws')
 var os = require('os')
 var http = require('http')
 var fs = require('fs')
 var exec = require('child_process').exec
-var ws = new WebSocket('ws://169.254.233.80:1234');
+var ws = new WebSocket('ws://'+TRIGGER_IP+':'+TRIGGER_PORT);
 
 
 //** VAR DECLARATIONS
-var PIN = [4, 17]; // [SHUTTER, AF]
 var serialNumber = ''
 var ipAddress = '';
 var websocket =''
 var browserapp = ''
+
+var PIN = [4, 17]; // [SHUTTER, AF]
+var picCt =0; //picture count
+
 
 //** EXPORT GPIO PINS
 for(var i=0; i<PIN.length; i++){
@@ -69,7 +80,7 @@ ws.on('close',function(){
 //*** HANDLE WEBSOCKET MESSAGES
 ws.on('message', function(data, flags) {
   if(data == 'go'){
-    console.log(data)
+    console.log("trigger shutter, count "+ (picCt++));
     // flags.binary will be set if a binary data is received
     // flags.masked will be set if the data was masked
     hitShutter(); //*** TAKE PICTURE !!
@@ -82,20 +93,20 @@ ws.on('message', function(data, flags) {
   }
 });
 
-//** TAKE A PICTURE !! **
+//**** TAKE A PICTURE !! ****
 function hitShutter(){
   digitalWrite(PIN_SHUTTER, 1);
   setTimeout(function(){
      digitalWrite(PIN_SHUTTER, 0);
-   },300); //press duration
+   },300); //button press duration
 }
 
-//** half-press for Auto-Focus
+//**** half-press for Auto-Focus
 function hitAutoFocus(){
   digitalWrite(PIN_AF, 1);
   setTimeout(function(){
      digitalWrite(PIN_AF, 0);
-  },300); //press duration
+  },300); //button press duration
 }
 
 //** digitalWrite function
@@ -108,22 +119,22 @@ function digitalWrite(pin, state){
 
 
 function newCameraPost(objstring){
-  // var options = {
-  //   host:browserapp,
-  //   port:80,
-  //   path:'/camera',
-  //   method:'POST',
-  //   headers:{
-  //   'Content-Type': 'application/json',
-  //   'Content-Length': objstring.length
-  //   }
-  // }
-  // // also send to browser computer
-  // var req = http.request(options,function(res){
-  //
-  // })
-  // req.write(objstring)
-  // req.end()
+  var options = {
+    host:BROWSER_IP,
+    port:3000,
+    path:'/camera',
+    method:'POST',
+    headers:{
+    'Content-Type': 'application/json',
+    'Content-Length': objstring.length
+    }
+  }
+  // also send to browser computer
+  var req = http.request(options,function(res){
+
+  })
+  req.write(objstring)
+  req.end()
 }
 
 
