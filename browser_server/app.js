@@ -29,8 +29,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
 app.get('/cameras/settings', settings.load(MasterSettings.settings,Database))
-app.post('/cameras/add', settings.addCamera(Database))
-app.get('/cameras/add', settings.addCamera(Database))
+app.post('/camera', settings.addCamera(Database))
+app.get('/camera', settings.addCamera(Database))
 app.get('/cameras/list', settings.displayCameras(Database))
 app.post('/cameras/save', settings.saveCamera(Database))
 app.post('/set', settings.saveSetting(Database))
