@@ -1,13 +1,25 @@
 var master, cameras
-var currentCamera=001
-var selectAll=false
+var currentCamera="all"
+var selectAll=true
 
 exports.load =  function(_settings, MongoDB){
 	return function(req,res){
+	var post=req.body
 	master=_settings
+	current=master
+	if(selectAll==false){
+		for(var i=0;i<current.length;i++){
+			var currentVal=res.get('http://'+currentCamera+'/get?'+current[i].call)
+			if(currentVal){
+				current[i].value=currentVal
+			}
+			console.log('http://'+currentCamera+'/get?'+current[i].call)
+			console.log(current[i].value)
+		}
+	}
 	var cameras=MongoDB.getAll('cameras', function(e, _data){
 		if(!e){
-			_data=sortByKey(_data,'camera_id');
+			_data=sortByKey(_data,'camera_id');	
 		    res.render('camera-settings', {
 			    settings: master,
 			    cameras:_data,
@@ -114,6 +126,12 @@ exports.armCameras = function (MongoDB){
 exports.selectCamera=function (){
 	return function(req,res){
 		var get=req.param('camera_id');
+		if(get=="all"){
+			selectAll=true	
+		}
+		else{
+			selectAll=false
+		}
 		console.log(get)
 		currentCamera=get
 		res.redirect('/cameras/settings')
@@ -122,22 +140,30 @@ exports.selectCamera=function (){
 
 exports.saveSetting=function(MongoDB){
 	return function(req,res){
+	if(selectAll==false){
 		var post=req.body
-		console.log(post)
-		console.log(Object.keys(post))
-
 		MongoDB.queryCollection('cameras',{camera_id:currentCamera},function(e,_data){
 			if(!e){
 				console.log(_data);
-				console.log('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post.manualfocusdrive)
-				res.get('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post.manualfocusdrive)
+				console.log('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post[0])
+				res.get('http://'+_data[0].address+'/set?'+Object.keys(post)+'='+post[0])
 			}
 		})
 	}
+	else{
+		var post=req.body
+		MongoDB.getAll('cameras', function(e, _data){
+			if(!e){
+				for(var i=0;i<_data.length;i++){
+					console.log(_data[i]);
+					console.log('http://'+_data[i].address+'/set?'+Object.keys(post)+'='+post[0])
+					res.get('http://'+_data[i].address+'/set?'+Object.keys(post)+'='+post[0])
+				}
+				}
+		})
+	}
+	}
 }
-
-
-
 
 function sortByKey(array, key) {
     return array.sort(function(a, b) {
