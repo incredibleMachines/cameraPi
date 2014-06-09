@@ -1,11 +1,12 @@
 {
-  "name": "camera",
+  "name": "capture",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-     "restler" : "*"
+     "ws" : "0.4.x",
+	   "onoff" : "*"
   }
 }
