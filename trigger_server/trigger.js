@@ -1,6 +1,15 @@
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({port:1234})
 var _ = require('underscore')
+var BROWSER_IP = 'http://10.0.1.28'//'192.168.0.4'
+var http = require('http')
+
+var deviceList = []
+
+console.log("Arming Cameras For Trigger.")
+armCameras(function(_deviceList){
+    deviceList = _deviceList
+})
 
 var connectedDevices = []
 
@@ -23,7 +32,7 @@ wss.on('connection',function(socket){
     console.log('Socket Disconnect '+connection.address)
     for(var i in connectedDevices){
       if(connection.address==connectedDevices.address){
-        connectedDevices.slice(i)
+        connectedDevices.splice(i,1)
         break
       }
     }
@@ -53,7 +62,8 @@ var app = express();
 app.get('/broadcast', function(req, res){
   wss.broadcast('go')
   res.send('sending image trigger');
-});
+})
+
 app.get('/sendsteps',function(req,res){
   //var counter = 0
 
@@ -65,6 +75,15 @@ app.get('/sendsteps',function(req,res){
   }
   res.jsonp({devices:connectedDevices})
 
+
+})
+
+app.get('/arm',function(req,res){
+
+    armCameras(function(_deviceList){
+      deviceList = _deviceList
+      res.jsonp(_deviceList)
+    })
 
 })
 
@@ -82,3 +101,23 @@ app.get('/toggleleader',function(req,res){
 })
 
 app.listen(3000);
+
+
+function armCameras(cb){
+  var info = ''
+  http.get(BROWSER_IP+':3000/arm',function(res){
+    res.on('data', function (chunk) {
+        info+=chunk
+    })
+    res.on('close',complete)
+    res.on('end',complete)
+  }).on('error',function(e){
+    console.error(e)
+  })
+
+  function complete(){
+    cb(JSON.parse(info))
+    //res.jsonp(deviceList)
+  }
+
+}
