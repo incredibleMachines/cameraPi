@@ -9,9 +9,9 @@ CAMERA.JS
 
 //**********************************//
 
-// TRUE HOST_IP = "192.168.0.2"
-var DOWNLOAD_IP = "192.168.0.42" // TRUE HOST_IP = "192.168.0.2"
-var VERSION = "RC2" //
+var HOST_IP = "192.168.0.2" //TRUE IP
+// var DOWNLOAD_IP = "192.168.0.42"
+var VERSION = "RC2.1" //
 
 //**********************************//
 
@@ -95,11 +95,7 @@ http.createServer(function (req, res) {
 
     }else if(url_parts.pathname == '/version'){
 
-      //TODO: IMMEDIATE: RETURN IMAGE VERSION NUMBER;
-      var RC = VERSION;
-
-
-
+      res.end(JSON.stringify({"version":VERSION}));
 
     }else{
       res.end(JSON.stringify({error:"unrecognized"}))

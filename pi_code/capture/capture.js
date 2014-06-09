@@ -7,8 +7,10 @@
 
 //**********************************//
 
-var BROWSER_IP = "192.168.0.4"
-var TRIGGER_IP = "192.168.0.3" //REAL:192.168.0.3 // JOE: "192.168.0.42
+var BROWSER_IP = "192.168.0.4" //TRUE IP
+var TRIGGER_IP = "192.168.0.3" //TRUE IP
+// var BROWSER_IP = "192.168.0.42"
+// var TRIGGER_IP = "192.168.0.42"
 var TRIGGER_PORT    = "1234"
 
 //**********************************//
@@ -48,17 +50,16 @@ var PIN_SHUTTER   = new Gpio(PIN[0], 'out');
 var PIN_AF        = new Gpio(PIN[1], 'out');
 
 getIPAddress(function(_ipAddress){
-    console.log('IP ADDRESS: '+_ipAddress)
-    if(!_ipAddress){ getIPAddress(arguments.callee)
-    }else if(_ipAddress.toString().indexOf('192.168.0')===-1){
-        getIPAddress(arguments.callee())
-    }else{
-      ipAddress = _ipAddress
-      getSerialNumber(ipAddress,function(objectstring){
-        connectSocket(objectstring)
-      })
-    }
-
+  console.log('IP ADDRESS: '+_ipAddress)
+  if(!_ipAddress){ getIPAddress(arguments.callee)
+  }else if(_ipAddress.toString().indexOf('192.168.0')===-1){
+      getIPAddress(arguments.callee())
+  }else{
+    ipAddress = _ipAddress
+    getSerialNumber(ipAddress,function(objectstring){
+      connectSocket(objectstring)
+    })
+  }
 })
 //*** SETUP NETWORK CONNECTION
 function getIPAddress(cb){
@@ -123,8 +124,8 @@ function connectSocket(objectstring){
         // flags.binary will be set if a binary data is received
         // flags.masked will be set if the data was masked
         hitShutter(); //*** TAKE PICTURE !!
-        console.log("trigger shutter, count "+ (picCt++));
 
+        console.log("trigger shutter, count "+ (picCt++));
       }
       else if(data == 'close'){
         var child = exec('echo raspberry | sudo shutdown -h now',function(error,stdout,stderr){
