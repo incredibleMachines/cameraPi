@@ -33,7 +33,7 @@ app.post('/cameras/add', settings.addCamera(Database))
 app.get('/cameras/add', settings.addCamera(Database))
 app.get('/cameras/list', settings.displayCameras(Database))
 app.post('/cameras/save', settings.saveCamera(Database))
-app.post]]('/set', settings.saveSetting(Database))
+app.post('/set', settings.saveSetting(Database))
 app.get('/cameras/select', settings.selectCamera())
 app.get('/arm', settings.armCameras(Database))
 
