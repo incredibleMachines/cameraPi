@@ -10,10 +10,10 @@
 
 //**********************************//
 
-var BROWSER_IP = "192.168.0.4" //TRUE
-var TRIGGER_IP = "192.168.0.3" //TRUE
-// var BROWSER_IP = "192.168.0.42"
-// var TRIGGER_IP = "192.168.0.42"
+// var BROWSER_IP = "192.168.0.4" //TRUE
+// var TRIGGER_IP = "192.168.0.3" //TRUE
+var BROWSER_IP = "192.168.0.42"
+var TRIGGER_IP = "192.168.0.42"
 var TRIGGER_PORT    = "1234"
 
 //**********************************//
@@ -173,10 +173,10 @@ function configLaser(job){
 
   if(groupLeader){ //watch sensor!
 
-    var strExec = 'gpio export '+PIN_LASER+ ' out';
-    var child = exec(strExec,function(error,stdout,stderr){
-      if(error) console.log("GPIO ERROR: "+error);
-      else {
+    var strExec = 'gpio export '+PIN_LASER+ ' in';
+    //var child = exec(strExec,function(error,stdout,stderr){
+    //  if(error) console.log("GPIO ERROR: "+error);
+    //  else {
         //** set watch with callback on laserpin RISING
         PIN_LASER.watch(function(err, value) {
             //console.log("LASER TRIP RISING DETECTED");
@@ -184,8 +184,8 @@ function configLaser(job){
         });
         console.log(">> Running Laser.js, configured as GROUP LEADER <<");
         standbyLed = PIN_LED_GRN;
-      }
-    })
+      //}
+    //})
   }
 
   else{
