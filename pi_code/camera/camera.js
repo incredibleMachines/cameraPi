@@ -32,9 +32,6 @@ for(var i=0; i<PIN.length; i++){
   })
 }
 
-for(var i=0; i<25; i++){
-  console.log("chris likes dudes");
-}
 
 //*** SETUP PINS
 var PIN_AF = new Gpio(PIN[0], 'out');
