@@ -4,18 +4,25 @@
 
 <form id="cameras-list" action="http://127.0.0.1:3000/cameras/save" method="post">
 
+<div class="camera_id">
+
+<input type="text" name="camera_id" value="<%= cameras[i].camera_id %>">
+
+</div>
+
 <input type="hidden" name="address" value="<%= cameras[i].address%>"><div class="address">Address: <%= cameras[i].address%></div>
 
 <input type="hidden" name="serial" value="<%= cameras[i].serial%>"><div class="serial"> Serial: <%= cameras[i].serial %> </div>
 
-<div class="camera_id">
+<div class="laser"><input type="checkbox" name="laser"<%if(cameras[i].laser==true){%><%= "checked"%><%}%>>Has Laser</input></div>
+<div class="master"><input type="checkbox" name="master"<%if(cameras[i].master==true){%><%= "checked"%><%}%>>Is Master?</input></div>
 
-<input type="text" name="camera_id" value="<%= cameras[i].camera_id %>"><input type="submit" value="Save"></div>
+<div class="master-number">Master Unit Number:<input type="text" name="master_number" value="<%= cameras[i].master_number %>"></div>
+<div class="delay">Delay:<input type="text" name="delay" value="<%= cameras[i].delay %>"></div>
 
-
-</div>
-
+<input type="submit" value="Save">
 </form>
+-----------------------------------------------------------------------
 <% } %>
 
 <% include includes/footer %>

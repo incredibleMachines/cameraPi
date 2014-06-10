@@ -9,10 +9,11 @@
 	<option value=<%= cameras[i].camera_id %> <% if(cameras[i].camera_id==currentCamera){ %><%= "selected" %><%}%> >
 	<%= cameras[i].camera_id %>
 <%}%>
-
 </select>
 <input type="submit" value="Change Camera">
 </form>
+
+<button id="poll-camera">Poll Camera</button>
 
 <% for (var i=0;i<settings.length;i++){%>
 <form id= "camera-settings" method="post" action="/set">
