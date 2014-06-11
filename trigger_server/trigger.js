@@ -9,10 +9,6 @@ var deviceList = []
 var TriggerActive =false;
 
 
-setInterval(function(){
-
-  wss.pingAll(true)
-},10000)
 
 console.log("Arming Cameras For Trigger.")
 armCameras(function(_deviceList){
@@ -48,7 +44,7 @@ wss.on('connection',function(socket){
 })
 
 wss.pingAll = function(bActive){
-  if(bActive == true)
+  //if(bActive == true)
     for(var i in this.clients)
       this.clients[i].ping( new Date().now )
 }
@@ -89,6 +85,10 @@ app.get('/sendsteps',function(req,res){
   res.jsonp({devices:connectedDevices})
 
 
+})
+app.get('/ping',function(req,res){
+    wss.pingAll(true)
+    res.jsonp({yo:'fool'})
 })
 
 app.get('/arm',function(req,res){
