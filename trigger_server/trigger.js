@@ -47,6 +47,10 @@ wss.pingAll = function(bActive){
   //if(bActive == true)
     for(var i in this.clients)
       this.clients[i].ping( new Date().now )
+
+    setTimeout(function(pingAll){
+      pingAll()
+    }(this.pingAll),10000)
 }
 
 wss.broadcast = function(data) {
