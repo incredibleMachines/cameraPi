@@ -6,6 +6,14 @@ var http = require('http')
 
 var deviceList = []
 
+var TriggerActive =false;
+
+
+setInterval(function(){
+
+  wss.pingAll(true)
+},10000)
+
 console.log("Arming Cameras For Trigger.")
 armCameras(function(_deviceList){
     deviceList = _deviceList
@@ -39,6 +47,11 @@ wss.on('connection',function(socket){
   })
 })
 
+wss.pingAll = function(bActive){
+  if(bActive == true)
+    for(var i in this.clients)
+      this.clients[i].ping( new Date().now )
+}
 
 wss.broadcast = function(data) {
     // this.clients.forEach(function(client){
