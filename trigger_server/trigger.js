@@ -49,7 +49,7 @@ wss.pingAll = function(bActive){
       this.clients[i].ping( new Date().now )
 
     setTimeout(function(pingAll){
-      pingAll()
+      pingAll(true)
     }(this.pingAll),10000)
 }
 
