@@ -48,9 +48,9 @@ wss.pingAll = function(bActive){
     for(var i in this.clients)
       this.clients[i].ping( new Date().now )
 
-    setTimeout(function(pingAll){
-      pingAll(true)
-    }(this.pingAll),10000)
+    setTimeout(function(_ws){
+      _ws.pingAll(true)
+    }(this),10000)
 }
 
 wss.broadcast = function(data) {
