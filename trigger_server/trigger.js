@@ -32,6 +32,13 @@ wss.on('connection',function(socket){
       connectedDevices.sort(function(a,b){ return a.id - b.id })
     }
   })
+  socket.on("pong",function(message){
+    var time = new Date().now
+    console.log("Recieved Pong:")
+    console.log(message)
+    console.log("RoundTrip: "+ (time -message) )
+    socket.ping( new Date().now )
+  })
   socket.on("close",function(message){
     console.log('Socket Disconnect '+connection.address)
     for(var i in connectedDevices){
@@ -47,10 +54,6 @@ wss.pingAll = function(bActive){
   //if(bActive == true)
     for(var i in this.clients)
       this.clients[i].ping( new Date().now )
-
-    setTimeout(function(_ws){
-      _ws.pingAll(true)
-    }(this),10000)
 }
 
 wss.broadcast = function(data) {
