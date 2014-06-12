@@ -6,6 +6,10 @@ var http = require('http')
 
 var deviceList = []
 
+var TriggerActive =false;
+
+
+
 console.log("Arming Cameras For Trigger.")
 armCameras(function(_deviceList){
     deviceList = _deviceList
@@ -28,6 +32,13 @@ wss.on('connection',function(socket){
       connectedDevices.sort(function(a,b){ return a.id - b.id })
     }
   })
+  socket.on("pong",function(message){
+    var time = new Date().now
+    console.log("Recieved Pong:")
+    console.log(message)
+    console.log("RoundTrip: "+ (time -message) )
+    socket.ping( new Date().now )
+  })
   socket.on("close",function(message){
     console.log('Socket Disconnect '+connection.address)
     for(var i in connectedDevices){
@@ -37,8 +48,16 @@ wss.on('connection',function(socket){
       }
     }
   })
+  socket.on("error",function(error){
+    console.log("Received Socket Error: "+error)
+  })
 })
 
+wss.pingAll = function(bActive){
+  //if(bActive == true)
+    for(var i in this.clients)
+      this.clients[i].ping( new Date().now )
+}
 
 wss.broadcast = function(data) {
     // this.clients.forEach(function(client){
@@ -76,6 +95,10 @@ app.get('/sendsteps',function(req,res){
   res.jsonp({devices:connectedDevices})
 
 
+})
+app.get('/ping',function(req,res){
+    wss.pingAll(true)
+    res.jsonp({yo:'fool'})
 })
 
 app.get('/arm',function(req,res){

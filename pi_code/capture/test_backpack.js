@@ -47,31 +47,79 @@ var PIN_LED_GRN   = new Gpio(PIN[4], 'out');
 var PIN_LED_BLUE  = new Gpio(PIN[5], 'out');
 var PIN_LED_3MM   = new Gpio(PIN[6], 'out');
 
-var GPIO_out= [PIN_SHUTTER, PIN_AF, PIN_LED_RED, PIN_LED_GRN, PIN_LED_BLUE, PIN_LED_3MM];
+var GPIO_out=         [PIN_SHUTTER, PIN_AF, PIN_LED_RED, PIN_LED_GRN, PIN_LED_BLUE, PIN_LED_3MM];
 var GPIO_out_strings= ['PIN_SHUTTER', 'PIN_AF', 'PIN_LED_RED', 'PIN_LED_GRN', 'PIN_LED_BLUE', 'PIN_LED_3MM'];
+
+// var GPIO_out = [PIN_SHUTTER];
+// var GPIO_out = ['PIN_SHUTTER'];
 
 var standbyLed    = PIN_LED_BLUE;
 
 var testPin = 0; //0 is laser
 
-setTimeout(function(){
-   configLaser(groupLeader); //config as default
- },1000); //wait a second for Gpio(pin) to config first
+// setTimeout(function(){
+//    configLaser(groupLeader); //config as default
+//  },1000); //wait a second for Gpio(pin) to config first
 
-for(var j=0; j<1000; j++){
-  sleep(500, function() {
-     test(GPIO_out, testPin)
-     console.log("go: "+ GPIO_out_strings[testPin]);
-   }
-  );
+for(var i=0; i< 100000; i++){
+  sleep(800, function(){
+    digitalWrite(PIN_SHUTTER, 1);
+    sleep(800,function(){
+      digitalWrite(PIN_SHUTTER, 0);
+    })
+  })
+
+  sleep(800, function(){
+    digitalWrite(PIN_AF, 1);
+    sleep(800,function(){
+      digitalWrite(PIN_AF, 0);
+    })
+  })
+
+  sleep(25, function(){
+    digitalWrite(PIN_LED_RED, 1);
+    sleep(1000,function(){
+      digitalWrite(PIN_LED_RED, 0);
+    })
+  })
+
+  sleep(25, function(){
+    digitalWrite(PIN_LED_GRN, 1);
+    sleep(1000,function(){
+      digitalWrite(PIN_LED_GRN, 0);
+    })
+  })
+
+  sleep(25, function(){
+    digitalWrite(PIN_LED_BLUE, 1);
+    sleep(1000,function(){
+      digitalWrite(PIN_LED_BLUE, 0);
+    })
+  })
+
+  sleep(25, function(){
+    digitalWrite(PIN_LED_3MM, 1);
+    sleep(1000,function(){
+      digitalWrite(PIN_LED_3MM, 0);
+    })
+  })
+
 }
+
+// for(var j=0; j<1000; j++){
+//   sleep(1000, function() {
+//      test(GPIO_out, testPin)
+//      console.log("go: "+ GPIO_out_strings[testPin]);
+//    }
+//   );
+// }
 
 function test(gpiopins, num){
   digitalWrite(gpiopins[num], 1);
-   testPin++;
    if(testPin > gpiopins.length-1)testPin = 0;
-   sleep(500, function(){
+   sleep(1000, function(_testPin){
      digitalWrite(gpiopins[num], 0);
+     _testPin++;
    })
 }
 
