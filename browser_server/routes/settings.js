@@ -227,6 +227,16 @@ exports.armCameras = function (MongoDB){
 	}
 }
 
+exports.getinfo = function (MongoDB){
+	return function(req,res){
+		var cameras=MongoDB.getAll('cameras', function(e, _data){
+			if(!e){
+				res.jsonp(_data)
+			}
+		})
+	}
+}
+
 exports.selectCamera=function (){
 	return function(req,res){
 		var get=req.param('camera_id');
