@@ -30,12 +30,36 @@ exports.gitPull = function(MongoDB){
 			if(!e){
 				var count=0
 			_data.forEach(function(addr, i){
-				console.log(_data)
+				//console.log(_data)
 				console.log('http://'+addr.address+':8080/gitpull')
 				http.get('http://'+addr.address+':8080/gitpull', function(server){
 					console.log("Got response: " + res.statusCode)
 				}).on('error', function(e) {
   					console.log("Got error: " + e.message)
+				});
+				count++
+				if(count==_data.length){
+					res.redirect('/camera/list')
+				}
+			})
+			}
+		})
+	}
+}
+
+
+exports.shutdown = function(MongoDB){
+	return function(req,res){
+		MongoDB.getAll('cameras',function(e, _data){
+			if(!e){
+				var count=0
+			_data.forEach(function(addr, i){
+				//console.log(_data)
+				console.log('http://'+addr.address+':8080/shutdown')
+				http.get('http://'+addr.address+':8080/shutdown', function(server){
+					console.log("Got response: " + res.statusCode)
+				}).on('error', function(e) {
+						console.log("Got error: " + e.message)
 				});
 				count++
 				if(count==_data.length){

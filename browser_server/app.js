@@ -46,6 +46,7 @@ app.get('/cameras/ping',controls.pingCameras())
 app.get('/images',images.renderPage())
 app.post('/save_image',images.saveImage())
 app.get('/gitpull',controls.gitPull(Database))
+app.get('/shutdown',controls.shutdown(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
 	  console.log('Express server listening on port ' + app.get('port').toString());
