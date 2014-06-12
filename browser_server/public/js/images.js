@@ -1,19 +1,29 @@
+var editPoints 	
+var currentCamera
+
+var loadPoints = function(vars,cur){
+	currentCamera=parseInt(cur)
+	console.log("CURRENT:"+currentCamera)	
+	editPoints=vars[currentCamera].warp
+	
+}
+
 $(document).ready(function(){
 	var method="psr"
 	
 	var mouseThreshold=20
 	
 	var imgPoints = [{x:0,y:0},{x:960,y:0},{x:960,y:640},{x:0,y:640} ]
-	var editPoints = [{x:20,y:20},{x:620,y:20},{x:620,y:620},{x:20,y:620} ]
+/* 	var editPoints =  */
 	
-				$('#0X').attr("value",editPoints[0]["x"])
-			$('#0Y').attr("value",editPoints[0]["y"])
-			$('#1X').attr("value",editPoints[1]["x"])
-			$('#1Y').attr("value",editPoints[1]["y"])
-			$('#2X').attr("value",editPoints[2]["x"])
-			$('#2Y').attr("value",editPoints[2]["y"])
-			$('#3X').attr("value",editPoints[3]["x"])
-			$('#3Y').attr("value",editPoints[3]["y"])
+		$('#0X').attr("value",editPoints[0]["x"])
+		$('#0Y').attr("value",editPoints[0]["y"])
+		$('#1X').attr("value",editPoints[1]["x"])
+		$('#1Y').attr("value",editPoints[1]["y"])
+		$('#2X').attr("value",editPoints[2]["x"])
+		$('#2Y').attr("value",editPoints[2]["y"])
+		$('#3X').attr("value",editPoints[3]["x"])
+		$('#3Y').attr("value",editPoints[3]["y"])
 	
 	var c=document.getElementById("image-editor")
 	var ctx=c.getContext("2d")
@@ -69,7 +79,8 @@ $(document).ready(function(){
 		})
 
 		$(document).keydown(function(event){
-			var moveModifier=0.1
+			console.log(editPoints)
+
 			
 			if(event.shiftKey==true){
 				moveModifier=5
@@ -209,19 +220,19 @@ $(document).ready(function(){
 	}
 	
 	function adjustPosition (x, y, which){
-		editPoints[which]["x"]+=x
-		editPoints[which]["y"]+=y
+		editPoints[which]["x"]=parseFloat(editPoints[which]["x"])+x
+		editPoints[which]["y"]=parseFloat(editPoints[which]["y"])+y
 	}	
 	
 	function adjustZoom (amt){
-		editPoints[0]["x"]-=amt
-		editPoints[0]["y"]-=amt
-		editPoints[1]["x"]+=amt
-		editPoints[1]["y"]-=amt
-		editPoints[2]["x"]+=amt
-		editPoints[2]["y"]+=amt
-		editPoints[3]["x"]-=amt
-		editPoints[3]["y"]+=amt
+		editPoints[0]["x"]=parseFloat(editPoints[0]["x"])-amt
+		editPoints[0]["y"]=parseFloat(editPoints[0]["y"])-amt
+		editPoints[1]["x"]=parseFloat(editPoints[1]["x"])+amt
+		editPoints[1]["y"]=parseFloat(editPoints[1]["y"])-amt
+		editPoints[2]["x"]=parseFloat(editPoints[2]["x"])+amt
+		editPoints[2]["y"]=parseFloat(editPoints[2]["y"])+amt
+		editPoints[3]["x"]=parseFloat(editPoints[3]["x"])-amt
+		editPoints[3]["y"]=parseFloat(editPoints[3]["y"])+amt
 	}
 	
 	function adjustRotate (angle){

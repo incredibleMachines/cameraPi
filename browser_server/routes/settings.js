@@ -196,10 +196,6 @@ return function(req,res){
 							newSettings.call=setting.call
 							newSettings.value=setting.value
 							newSettings.camera_id=post.camera_id
-							newSettings.laser=post.laser
-							newSettings.master=post.master
-							newSettings.master_number=post.master_number
-							newSettings.delay=post.delay
 							MongoDB.add('settings', newSettings, function(e){})
 						})
 						console.log("added settings to db!")
@@ -209,8 +205,14 @@ return function(req,res){
 				}
 
 		})
+		
+		var reset=[{x:20,y:20},{x:620,y:20},{x:620,y:620},{x:20,y:620} ]
+		
+		MongoDB.update('cameras',{camera_id:post.camera_id, warp:{$exists:false}},{$set: {warp:reset}}, function(e, _data){
+			console.log("update warp")
+		})
+		
 		MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id,laser:post.laser,master:post.master,master_number:post.master_number,delay:post.delay}}, function(e, _data){
-			console.log("saved")
 			res.redirect('/cameras/list')
 		})
 
