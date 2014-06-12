@@ -47,6 +47,7 @@ app.get('/images',images.renderPage(Database))
 app.post('/save-image',images.saveImage(Database))
 app.get('/set-camera',images.setCamera())
 app.get('/gitpull',controls.gitPull(Database))
+app.get('/shutdown',controls.shutdown(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
 	  console.log('Express server listening on port ' + app.get('port').toString());
