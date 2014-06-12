@@ -48,6 +48,9 @@ wss.on('connection',function(socket){
       }
     }
   })
+  socket.on("error",function(error){
+    console.log("Received Socket Error: "+error)
+  })
 })
 
 wss.pingAll = function(bActive){
