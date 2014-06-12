@@ -1,6 +1,10 @@
 <% /* SCENES SINGLE PAGE */ %>
 <% include includes/header %>
 
+<form id="camera-select" method="get" action="/cameras/ping">
+<input type="submit" value="Ping Cameras">
+</form>
+
 <form id="camera-select" method="get" action="/cameras/select">
 <strong>Select Camera:</strong>
 <select name="camera_id">

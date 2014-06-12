@@ -12,6 +12,8 @@ Database.MongoConnect();
 var app = express();
 
 var settings=require( __dirname +'/routes/settings');
+var controls=require( __dirname +'/routes/controls');
+var images=require( __dirname +'/routes/images');
 
 app.set('port', process.env.PORT || 3000);
 app.set('title', 'Camera Controller');
@@ -37,6 +39,12 @@ app.post('/set', settings.saveSetting(Database))
 app.get('/cameras/select', settings.selectCamera())
 app.get('/arm', settings.armCameras(Database))
 app.get('/setupDB', settings.setupDB(MasterSettings.settings,Database))
+app.get('/controller',controls.renderPage())
+app.get('/trigger',controls.triggerCameras())
+app.get('/cameras/ping',controls.pingCameras())
+app.get('/images',images.renderPage())
+app.post('/save_image',images.saveImage())
+app.get('/gitpull',controls.gitPull(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
 	  console.log('Express server listening on port ' + app.get('port').toString());
