@@ -6,6 +6,9 @@ var BROWSER_IP = 'http://192.168.0.4'
 var deviceList = []
 var currentDirectory
 
+var imagecount = 0
+var imagetotal = 20
+
 
 getCameras(function(_deviceList){
     deviceList = _deviceList
@@ -20,12 +23,21 @@ return function(req,res){
 }
 }
 
+exports.startProcessing=function(){
+    return function(req,res){
+      http.get('http://127.0.0.1:3002/?take=1402557537181',function(res){
+          console.log("inited procesing")
+      })
+    }
+}
+
 exports.initDownload= function(){
   return function(req,res){
   var time=new Date().getTime()
   fs.mkdir('images/'+time,function(){
     currentDirectory='images/'+time
   })
+  imagecount=0
 }
 }
 
@@ -51,11 +63,12 @@ exports.saveImage = function(){
         camera_id=camera['camera_id']
       }
   })
-  fs.rename(image.path,'images/'+currentDirectory+'/'+camera_id+'.jpg', function(err){
-    imageCounter++;
+  fs.rename(image.path,currentDirectory+'/'+camera_id+'.jpg', function(err){
+    imagecount++;
     if(err) console.error(err)
     console.log('Image Saved.')
   })
+
 }
 }
 

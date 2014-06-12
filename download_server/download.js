@@ -35,6 +35,7 @@ var imageCounter = 0;
 app.post('/',download.saveImage())
 app.get('/get-cameras',download.getCameraInfo())
 app.get('/init',download.initDownload())
+app.get('/process',download.startProcessing())
 
 
 http.createServer(app).listen(app.get('port'), function(){
