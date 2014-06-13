@@ -11,6 +11,7 @@
      "mongodb":"1.x",
      "underscore":"*",
      "less-middleware": "0.1.x",
-    "ejs": "*"
+    "ejs": "*",
+    "gm":"*"
   }
 }

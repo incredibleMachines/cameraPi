@@ -4,13 +4,13 @@ var path = require('path')
 var fs = require('fs')
 var http = require('http')
 
-var download=require( __dirname +'/routes/download');
+var processing=require( __dirname +'/routes/processing');
 
 var app = express()
 
 
 
-app.set('port', process.env.PORT || 3001)
+app.set('port', process.env.PORT || 3002)
 app.set('title', 'Image Downloader')
 app.set('views', __dirname + '/views')
 app.set('view engine', 'ejs')
@@ -32,10 +32,9 @@ if ('development' == app.get('env')) {
 var imageCounter = 0;
 
 
-app.post('/',download.saveImage())
-app.get('/get-cameras',download.getCameraInfo())
-app.get('/init',download.initDownload())
-app.get('/process',download.startProcessing())
+app.get('/',processing.cropImages())
+// app.get('/render',processing.renderVideo())
+
 
 
 http.createServer(app).listen(app.get('port'), function(){

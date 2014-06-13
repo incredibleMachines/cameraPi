@@ -10,7 +10,7 @@ exports.setupDB = function (_settings, MongoDB){
 		console.log(_settings)
 		console.log(_settings[0])
 		_settings.forEach(function(setting,i){
-			
+
 			var values = {}
 			console.log(setting.call)
 			values.call=setting.call
@@ -20,18 +20,18 @@ exports.setupDB = function (_settings, MongoDB){
 			MongoDB.queryCollection('settings',{call:values.call},function(e,_data){
 				if(!e){
 					if(_data.length==0){
-						
+
 						MongoDB.add('settings', values, function(e){})
 					}
 					else{
 						console.log("found")
 						MongoDB.update('settings',{call:values.call,camera_id:"master"},{$set:{value:values.value}},function(e,_data){
-							
+
 						})
 					}
 				}
 				})
-				
+
 			var info = {}
 			info.call=_settings[i].call
 			info.name=_settings[i].name
@@ -40,12 +40,12 @@ exports.setupDB = function (_settings, MongoDB){
 			MongoDB.queryCollection('options',{call:info.call},function(e,_data){
 				if(!e){
 					if(_data.length==0){
-						
+
 						MongoDB.add('options', info, function(e){})
 					}
 				}
 				})
-			
+
 		})
 			res.redirect('/cameras/settings')
 		}
@@ -81,7 +81,7 @@ exports.load =  function(MongoDB){
 							item.order=option.order
 							current.push(item)
 						}
-						optionCount++	
+						optionCount++
 						if(optionCount==options.length){
 						current=sortByKey(current, 'order')
 							MongoDB.getAll('cameras', function(e, _data){
@@ -99,7 +99,7 @@ exports.load =  function(MongoDB){
 						}
 					})
 				})
-					
+
 			}
 		})
 	}
@@ -185,39 +185,51 @@ return function(req,res){
 		else if(post.master=="on"){
 			post.master=true
 		}
-		
+
 		MongoDB.queryCollection('settings',{camera_id:post.camera_id},function(e,_data){
 				if(!e){
 				if(_data.length==0){
 				console.log(_data)
 				MongoDB.queryCollection('settings',{camera_id:"master"},function(e,master_data){
-						master_data.forEach(function(setting,i){	
+						master_data.forEach(function(setting,i){
 							var newSettings = {}
 							newSettings.call=setting.call
 							newSettings.value=setting.value
 							newSettings.camera_id=post.camera_id
-							newSettings.laser=post.laser
-							newSettings.master=post.master
-							newSettings.master_number=post.master_number
-							newSettings.delay=post.delay
-							MongoDB.add('settings', newSettings, function(e){})		
+							MongoDB.add('settings', newSettings, function(e){})
 						})
-						console.log("added settings to db!")							
-						
+						console.log("added settings to db!")
+
 					})
 				}
 				}
-							
-		})
-		MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id,laser:post.laser,master:post.master,master_number:post.master_number,delay:post.delay}}, function(e, _data){
-			console.log("saved")
-			res.redirect('/cameras/list')
+
 		})
 		
+		var reset=[{x:20,y:20},{x:620,y:20},{x:620,y:620},{x:20,y:620} ]
+		
+		MongoDB.update('cameras',{camera_id:post.camera_id, warp:{$exists:false}},{$set: {warp:reset}}, function(e, _data){
+			console.log("update warp")
+		})
+		
+		MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id,laser:post.laser,master:post.master,master_number:post.master_number,delay:post.delay}}, function(e, _data){
+			res.redirect('/cameras/list')
+		})
+
 	}
 }
 
 exports.armCameras = function (MongoDB){
+	return function(req,res){
+		var cameras=MongoDB.getAll('cameras', function(e, _data){
+			if(!e){
+				res.jsonp(_data)
+			}
+		})
+	}
+}
+
+exports.getInfo = function (MongoDB){
 	return function(req,res){
 		var cameras=MongoDB.getAll('cameras', function(e, _data){
 			if(!e){
@@ -250,11 +262,11 @@ exports.saveSetting=function(MongoDB){
 		var key=Object.keys(post)[0]
 		var newValue=post[key]
 		console.log("key: "+key)
-		
+
 		MongoDB.update('settings',{camera_id:currentCamera,call:key},{$set:{value:newValue}},function(e,_data){
 			console.log("settings save to camera "+currentCamera)
 		})
-		
+
 		MongoDB.queryCollection('cameras',{camera_id:currentCamera},function(e,_data){
 			if(!e){
 				console.log(_data)
@@ -271,13 +283,13 @@ exports.saveSetting=function(MongoDB){
 	}
 	else{
 		var post=req.body
-		
+
 		var post=req.body
 		console.log(post)
 		var key=Object.keys(post)[0]
 		var newValue=post[key]
 		console.log("key: "+key)
-		
+
 		MongoDB.getAll('cameras', function(e, _data){
 			if(!e){
 				_data.forEach(function(camera,i){
@@ -285,7 +297,7 @@ exports.saveSetting=function(MongoDB){
 					MongoDB.update('settings',{camera_id:camera.camera_id,call:key},{$set:{value:newValue}},function(e,_data){
 						console.log("settings save to camera "+camera.camera_id)
 					})
-							
+
 					MongoDB.queryCollection('cameras',{camera_id:camera.camera_id},function(e,_data){
 						if(!e){
 							console.log(_data)
@@ -295,18 +307,18 @@ exports.saveSetting=function(MongoDB){
 							}).on('error', function(e) {
 			  					console.log("Got error: " + e.message)
 							});
-			
+
 						}
 					})
 		})
 		}})
 		res.redirect('/cameras/settings')
-		
+
 		MongoDB.update('settings',{camera_id:"master",call:key},{$set:{value:newValue}},function(e,_data){
 						console.log("settings save to camera master")
 					})
-		
-		
+
+
 	}
 	}
 }

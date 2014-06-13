@@ -1,10 +1,11 @@
 <% /* SCENES SINGLE PAGE */ %>
 <% include includes/header %>
 
+<form id="camera-ping" method="get" action="/cameras/ping">
+<input type="submit" value="Ping Cameras">
+</form>
+
 <form id="camera-select" method="get" action="/cameras/select">
-<strong>Select Camera:</strong>
-<select name="camera_id">
-<option value="all">all</option>
 <% for (var i=0;i<cameras.length;i++){%>
 	<option value=<%= cameras[i].camera_id %> <% if(cameras[i].camera_id==currentCamera){ %><%= "selected" %><%}%> >
 	<%= cameras[i].camera_id %>
