@@ -2,7 +2,7 @@
 
 <% for (var i=0;i<cameras.length;i++){%>
 
-<form id="cameras-list" action="http://127.0.0.1:3000/cameras/save" method="post">
+<form id="cameras-list" action="/cameras/save" method="post">
 
 <div class="camera_id">
 
@@ -21,6 +21,18 @@
 <div class="delay">Delay:<input type="text" name="delay" value="<%= cameras[i].delay %>"></div>
 
 <input type="submit" value="Save">
+
+</form>
+
+<form id="delete-camera" action="/cameras/delete" method="post">
+<input type="hidden" name="address" value="<%= cameras[i].address%>">
+<input type="submit" value="Delete">
+</form>
+
+<form id="ping-camera" action="/cameras/init" method="post">
+<input type="hidden" name="address" value="<%= cameras[i].address%>">
+<input type="submit" value="Ping Camera">
+
 </form>
 -----------------------------------------------------------------------
 <% } %>

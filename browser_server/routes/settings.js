@@ -64,6 +64,7 @@ exports.load =  function(MongoDB){
 		else{
 			selectCamera=currentCamera
 		}
+
 		var options
 		MongoDB.getAll('options', function(e, _data){
 			if(!e){
@@ -72,7 +73,7 @@ exports.load =  function(MongoDB){
 				options.forEach(function(option,i){
 					MongoDB.queryCollection('settings',{camera_id:selectCamera,call:option.call},function(e,currentdata){
 						if(!e){
-						console.log(currentdata[0])
+
 							var item={}
 							item.name=option.name
 							item.call=option.call
@@ -83,25 +84,41 @@ exports.load =  function(MongoDB){
 						}
 						optionCount++
 						if(optionCount==options.length){
-						current=sortByKey(current, 'order')
+							current=sortByKey(current, 'order')
 							MongoDB.getAll('cameras', function(e, _data){
-					if(!e){
-						_data=sortByKey(_data,'camera_id')
-					    res.render('camera-settings', {
-						    settings: current,
-						    cameras:_data,
-						    currentCamera:currentCamera,
-						    title: "Camera-Setting",
-						    header: "Camera Settings!"
-						})
-					}
-				})
+							if(!e){
+									console.log(_data)
+									_data=sortByKey(_data,'camera_id')
+					    		res.render('camera-settings', {
+						    		settings: current,
+						    		cameras:_data,
+						    		currentCamera:currentCamera,
+						    		title: "Camera-Setting",
+						    		header: "Camera Settings!"
+									})
+								}
+							})
 						}
 					})
 				})
-
 			}
 		})
+	}
+}
+
+exports.initCamera = function(_settings,MongoDB){
+	return function(req,res){
+		var post=req.body
+		console.log(req.body)
+		http.get('http://'+post.address+':8080/init', function(server){
+			console.log("Got response: " + res.statusCode)
+			console.log("From: "+_data[0].address)
+			res.redirect('/cameras/list')
+		}).on('error', function(e) {
+				console.log("Got error: " + e.message)
+				console.log("From: "+_data[0].address)
+				res.jsonp({"error":e.message})
+		});
 	}
 }
 
@@ -109,18 +126,64 @@ exports.addCamera = function (_settings, MongoDB){
 	return function(req,res){
 		console.log('page hit new-camera')
 		var post = req.body
-		console.log(post)
+		post.address = req.connection.remoteAddress;
+    console.log(post)
+
+
+
 		var camera
 		MongoDB.queryCollection('cameras',{serial:post.serial},function(e,_data){
 				if(!e){
 					if(_data.length==0){
+						if(post.serial!='NaN'){
 						console.log("new serial number found.")
 						camera={camera_id:'NULL',address:post.address,serial:post.serial,laser:false,master:false, master_number:null,delay:null}
-						MongoDB.add('cameras',camera, function(){
-							console.log("added to db!")
+						MongoDB.update('cameras',{address:post.address},{$set: {serial: post.serial}}, function(e, _data) {
+
+							if(!e){
+								if(typeof _data=='undefined'){
+									MongoDB.add('cameras',camera, function(){
+										console.log("added to db!")
+									})
+								}
+							}
+
 						})
+							}
+
+						else{
+							MongoDB.queryCollection('cameras',{address:post.address},function(e,_data){
+									if(!e){
+									if(_data.length==0){
+										console.log("new ip address number found.")
+										camera={camera_id:'NULL',address:post.address,serial:post.serial,laser:false,master:false, master_number:null,delay:null}
+										MongoDB.add('cameras',camera, function(){
+											console.log("added to db!")
+										})
+									}
+								}
+							})
+
+						}
+
 					}
+
+
 					else if(_data.length==1) {
+						if(post.serial=='NaN'){
+							MongoDB.queryCollection('cameras',{address:post.address},function(e,_data){
+								if(!e){
+								if(_data.length==0){
+									console.log("new ip address number found.")
+									camera={camera_id:'NULL',address:post.address,serial:post.serial,laser:false,master:false, master_number:null,delay:null}
+									MongoDB.add('cameras',camera, function(){
+										console.log("added to db!")
+									})
+								}
+							}
+						})
+						}
+						else{
 						if(_data[0].address==post.address){
 							console.log("camera found. no changes to record")
 						}
@@ -132,6 +195,22 @@ exports.addCamera = function (_settings, MongoDB){
 						})
 						}
 					}
+				}
+
+
+					else if(post.serial=='NaN'){
+						MongoDB.queryCollection('cameras',{address:post.address},function(e,_data){
+							if(!e){
+							if(_data.length==0){
+								console.log("new ip address number found.")
+								camera={camera_id:'NULL',address:post.address,serial:post.serial,laser:false,master:false, master_number:null,delay:null}
+								MongoDB.add('cameras',camera, function(){
+									console.log("added to db!")
+								})
+							}
+						}
+					})
+					}
 
 					else{
 						console.log("identical serial numbers found in db")
@@ -140,6 +219,10 @@ exports.addCamera = function (_settings, MongoDB){
 				else{
 					message=e;
 				}
+
+			/** MUST MUST MUST MUST SEND RESPONSE BACK TO CLIENT WITH SETTINGS **/
+			res.jsonp(post)
+
 		})
 	}
 }
@@ -152,6 +235,24 @@ exports.reset = function (){
 		    header: "Reset Camera"
 		})
 	}
+}
+
+exports.deleteCamera = function (MongoDB){
+
+	return function(req,res){
+
+var post = req.body
+MongoDB.remove('cameras',{address:post.address},function(e){
+
+	res.jsonp("camera:removed")
+
+})
+
+
+
+
+	}
+
 }
 
 exports.displayCameras = function (MongoDB){
@@ -186,7 +287,7 @@ return function(req,res){
 			post.master=true
 		}
 
-		MongoDB.queryCollection('settings',{camera_id:post.camera_id},function(e,_data){
+		MongoDB.queryCollection('settings',{camera_id:post.camera_id,address:post.address},function(e,_data){
 				if(!e){
 				if(_data.length==0){
 				console.log(_data)
@@ -205,14 +306,14 @@ return function(req,res){
 				}
 
 		})
-		
+
 		var reset=[{x:20,y:20},{x:620,y:20},{x:620,y:620},{x:20,y:620} ]
-		
-		MongoDB.update('cameras',{camera_id:post.camera_id, warp:{$exists:false}},{$set: {warp:reset}}, function(e, _data){
+
+		MongoDB.update('cameras',{camera_id:post.camera_id, warp:{$exists:false}, address:post.address},{$set: {warp:reset}}, function(e, _data){
 			console.log("update warp")
 		})
-		
-		MongoDB.update('cameras',{serial:post.serial},{$set: {camera_id: post.camera_id,laser:post.laser,master:post.master,master_number:post.master_number,delay:post.delay}}, function(e, _data){
+
+		MongoDB.update('cameras',{serial:post.serial, address:post.address},{$set: {camera_id: post.camera_id,laser:post.laser,master:post.master,master_number:post.master_number,delay:post.delay}}, function(e, _data){
 			res.redirect('/cameras/list')
 		})
 
@@ -221,9 +322,22 @@ return function(req,res){
 
 exports.armCameras = function (MongoDB){
 	return function(req,res){
+		var trigger={}
 		var cameras=MongoDB.getAll('cameras', function(e, _data){
 			if(!e){
-				res.jsonp(_data)
+				var count=0
+			_data=sortByKey(_data, 'camera_id')
+				_data.forEach(function(camera,i){
+					trigger[i.toString()]={}
+						trigger[i.toString()].camera_id=camera.camera_id
+						trigger[i.toString()].address=camera.address
+						trigger[i.toString()].serial=camera.serial
+						trigger[i.toString()].laser=camera.laser
+						count++
+				})
+				if(count==_data.length){
+				res.jsonp(trigger)
+				}
 			}
 		})
 	}
@@ -241,6 +355,7 @@ exports.getInfo = function (MongoDB){
 
 exports.selectCamera=function (){
 	return function(req,res){
+		console.log("SELECTED")
 		var get=req.param('camera_id');
 		if(get=="all"){
 			selectAll=true
@@ -248,7 +363,6 @@ exports.selectCamera=function (){
 		else{
 			selectAll=false
 		}
-		console.log(get)
 		currentCamera=get
 		res.redirect('/cameras/settings')
 	}
@@ -273,8 +387,10 @@ exports.saveSetting=function(MongoDB){
 				console.log('http://'+_data[0].address+':8080/set?'+key+'='+post[key])
 				http.get('http://'+_data[0].address+':8080/set?'+key+'='+post[key], function(server){
 					console.log("Got response: " + res.statusCode)
+					console.log("From: "+_data[0].address)
 				}).on('error', function(e) {
   					console.log("Got error: " + e.message)
+						console.log("From: "+_data[0].address)
 				});
 
 			}
@@ -304,8 +420,10 @@ exports.saveSetting=function(MongoDB){
 							console.log('http://'+_data[0].address+':8080/set?'+key+'='+post[key])
 							http.get('http://'+_data[0].address+':8080/set?'+key+'='+post[key], function(server){
 								console.log("Got response: " + res.statusCode)
+								console.log("From: "+_data[0].address)
 							}).on('error', function(e) {
 			  					console.log("Got error: " + e.message)
+									console.log("From: "+_data[0].address)
 							});
 
 						}
