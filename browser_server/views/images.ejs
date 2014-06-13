@@ -37,17 +37,21 @@
 <script src="/js/images.js"></script>
 
 <script>
-	
+
 	var currentCam
-	
+
 	<% for (var i=0;i<cameras.length;i++){%>
 	<% if(cameras[i].camera_id==currentCamera){%>
-	
-	currentCam=<%=i%>
 
-	<%}}%>
+	currentCam=<%- JSON.stringify(currentCamera) %>
+
+	<%}
+
+	}%>
 
 	var warp=<%- JSON.stringify(cameras) %>
+
+	console.log("ejs: " + currentCam)
 	loadPoints(warp,currentCam)
 </script>
 
