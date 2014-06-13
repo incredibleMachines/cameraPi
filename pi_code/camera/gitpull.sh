@@ -2,10 +2,28 @@
 
 cd ~/piFirmware
 
-spawn git pull local master
+spawn git fetch local master
 
 expect "Password:" {
 	send "git\r"
 }
 
 interact
+
+cd ~/piFirmware
+
+spawn git reset --hard FETCH_HEAD
+
+expect "\r" {
+	send "\r"
+}
+
+interact
+
+# spawn sudo reboot
+#
+# expect "Password:" {
+# 	send "pi\r"
+# }
+#
+# interact

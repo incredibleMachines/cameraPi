@@ -2,13 +2,12 @@ var express = require('express')
 var http = require('http')
 var path = require('path')
 var fs = require('fs')
-var http = require('http')
 
-var download=require( __dirname +'/routes/download');
+
+var download=require( __dirname +'/routes/download')
+
 
 var app = express()
-
-
 
 app.set('port', process.env.PORT || 3001)
 app.set('title', 'Image Downloader')
@@ -29,15 +28,22 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler())
 }
 
-var imageCounter = 0;
+app.listen(8080)
 
+var imageCounter = 0
+
+
+app.get('/capture-calibration', download.captureCalibrationImage())
+app.get('/set-method',download.setMethod())
 
 app.post('/',download.saveImage())
 app.get('/get-cameras',download.getCameraInfo())
 app.get('/init',download.initDownload())
 app.get('/process',download.startProcessing())
+app.get('/calibration',download.serveCalibrationImage())
+
 
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port '+ app.get('port').toString())
-});
+})
