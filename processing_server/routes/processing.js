@@ -42,14 +42,14 @@ queue.drain = function(){
     console.log("Queue Complete")
 
     fs.readdir(localPath+'/'+take+'/movs',function(error,files){
-       if(error) console.error(error)
+       if(error) console.error("drain error "+error)
        else{
          var count=0;
          files.forEach(function(file,i){
             console.log("RENAME: "+file);
 
           fs.rename(localPath+'/'+take+'/movs/'+file,localPath+'/'+take+'/renamed/'+i+'.mov',function(e){
-            if(e) console.error(e)
+            if(e) console.error("rename error: "+e)
             else{
               console.log("count: "+count+" Files Length: "+numJpgs-1);
                count++;
@@ -65,10 +65,10 @@ queue.drain = function(){
             }
             fs.writeFile(localPath+'/'+take+'/renamed/mylist.txt', filestring, function(err) {
               if(err) {
-                  console.log(err);
+                  console.error("writefile error: "+err);
               } else {
                   console.log("The file was saved!");
-                  var concat = "ffmpeg -f concat -i mylist.txt -c copy "+outputFinalPath
+                  var concat = "ffmpeg -f concat -i "+localPath+"/"+take+"/renamed/mylist.txt -c copy "+outputFinalPath
                   exec(concat,function(error,stdout,stderr){
                     if(!error){
                       console.log("Final Video Rendered! ENJOY!")
@@ -76,7 +76,7 @@ queue.drain = function(){
                       //res.jsonp({"status":"rendered"})
                     }
                     else{
-                      console.error(error)
+                      console.error("Concat error: "+error)
                       //res.jsonp({"status":"error on concat"})
                     }
                     //cb()
@@ -124,24 +124,24 @@ function processOutput(file,cb){
                   var inputPath=localPath+"/"+take+"/cropped/"+thisCam+".jpg"
                   var outputPath=localPath+"/"+take+"/movs/"+thisCam+".mov"
                   var videocmd = "/usr/local/bin/ffmpeg -f image2 -i "+inputPath+" -r "+length+" "+outputPath
-                  console.log(videocmd)
+                  console.log("videocmd "+videocmd)
                   exec(videocmd,function(error,stdout,stderr){
 
                     if(!error) console.log("video finished!")
                     else{
-                      console.log(error)
+                      console.error("error "+error)
                       //res.jsonp({"status":"error on video"})
                     }//endif(!error)
                     cb()
                   })//end exec videocmd
                 }
                 else{
-                  console.log("gm error!")
-                  console.log(e)
+                  //console.log("gm error!")
+                  console.error("gm error! "+e)
                   //res.jsonp({"status":"error on gm"})
                 }//endif(!e)
               })//end exec gmwrite
-            }else console.log(error)
+            }else console.error("some error "+error)
           })//exec command
 
   }else{
@@ -160,12 +160,13 @@ exports.cropImages = function(){
     take=req.param('take')
     console.log("process began")
     console.log(localPath+"/"+take)
+    res.jsonp({"Processing": "Please wait"})
     //fs.mkdir(localPath+"/"+take,function(error){
       //if(error) console.error(error)
       //console.log("mkdir completed")
       exec("cp -R "+remotePath+"/"+take+" "+localPath, function(err,stdout,stderr){
         if(err)console.error("mv command error "+err)
-        if(stderr) console.error(stderr)
+        if(stderr) console.error("NaN fartmen? "+stderr)
 
         deleteFolderRecursive(localPath+"/"+take+"/cropped")
         deleteFolderRecursive(localPath+"/"+take+"/warped")
@@ -181,7 +182,7 @@ exports.cropImages = function(){
         fs.readdir(localPath+"/"+take, function(err, files){
           //console.log("Processing: "+)
           var counter = 0;
-          console.log(files.length)
+          console.log("files length: "+files.length)
           queue.push(files,function(err){
               counter++
               if(err) console.error(err)
@@ -189,7 +190,7 @@ exports.cropImages = function(){
           })//queue.push
 
           if(err){
-            console.log(err)
+            console.error(err)
           }
 
           else{
@@ -211,7 +212,7 @@ function getCameras(cb){
     res.on('close',complete)
     res.on('end',complete)
   }).on('error',function(e){
-    console.error(e)
+    console.error("get cameras "+e)
   })
 
   function complete(){
