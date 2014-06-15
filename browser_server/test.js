@@ -19,6 +19,7 @@ app.use(express.session({secret: '!@#$%^&*()1234567890qwerty'}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
+TAKING OUT B/C JUST FOR DEV
 app.get('/', function(req,res){
 		res.render('test-page', {})
 })
@@ -26,7 +27,3 @@ app.get('/', function(req,res){
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port '.grey + app.get('port').toString().cyan);
 });
-
-
-
-

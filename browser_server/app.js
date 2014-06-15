@@ -52,6 +52,7 @@ app.get('/shutdown',controls.shutdown(Database))
 app.post('/cameras/init',settings.initCamera())
 app.post('/scanned',controls.scan())
 app.get('/send-armed',controls.sendArmed(Database))
+app.post('/cameras/images/center',images.saveCentered(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
 	  console.log('Express server listening on port ' + app.get('port').toString());
