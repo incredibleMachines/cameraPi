@@ -129,6 +129,16 @@ exports.updateByID=function(_type,_id,_updateObj,_cb){
 	})
 }
 
+//get a mongo document by collection and camera_id string
+//_type = collection type
+//_slug = single slug
+//_cb = callback(err,_document)
+exports.getDocumentByCameraID = function(_type,_camera_id,_cb){
+	collection[_type].findOne({camera_id:_camera_id},function(e,_doc){
+		if(!e)_cb(null,_doc);
+		else _cb(e);
+	})
+}
 
 //get a mongo document by collection and slug string
 //_type = collection type
@@ -168,4 +178,3 @@ function makeMongoID(__id){
 	if(typeof __id == "string" && __id.length == 24) return new BSON.ObjectID(__id.toString());
 	else return '';
 }
-

@@ -28,7 +28,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler())
 }
 
-app.listen(8080)
+app.listen(8081)
 
 var imageCounter = 0
 

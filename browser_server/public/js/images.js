@@ -1,12 +1,14 @@
 var editPoints
 var currentCamera='001'
 
-var DOWNLOAD_IP='192.168.0.2'
+// var DOWNLOAD_IP='192.168.0.2'
+var DOWNLOAD_IP='localhost'
 
 var loadPoints = function(vars,cur){
 	currentCamera=cur
-	console.log("CURRENT:"+currentCamera)
-	editPoints=vars[parseInt(currentCamera)].warp
+	console.log("CURRENT:"+parseInt(currentCamera))
+	editPoints=vars[parseInt(currentCamera)-1].warp
+	console.log(editPoints)
 
 }
 

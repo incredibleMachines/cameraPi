@@ -6,7 +6,8 @@ var exec = require('child_process').exec
 var gm = require('gm')
 var async = require('async')
 
-var BROWSER_IP = 'http://192.168.0.4'
+// var BROWSER_IP = 'http://192.168.0.4'
+var BROWSER_IP = 'localhost'
 
 var deviceList = []
 var currentDirectory
