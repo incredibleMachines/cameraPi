@@ -4,11 +4,13 @@ CAMERA.JS
 */
 
 //**********************************//
+//**********************************//
 
 var DOWNLOAD_IP  = "192.168.0.2"
-var BROWSER_IP   = "192.168.0.4"
-var VERSION      = "RC4"
+var BROWSER_IP   = "192.168.0.2"
+var VERSION      = "RC5.4"
 
+//**********************************//
 //**********************************//
 
 var Gpio = require('onoff').Gpio;
@@ -22,22 +24,43 @@ var http = require('http');
 //** VARS **//
 var downloadURL = "http://"+ DOWNLOAD_IP +":3001";
 var settingsFile = __dirname + '/settings.json';
+var settingsData = {};
+
 // [SHUTTER, AF, RED, GREEN, BLUE, 3MM, LASER]
 var PIN = [4, 17, 24, 27, 25, 22, 23];
+var bConnected = false; //only turn false on ** ERROR received
+var bPinsInited = false;
+var bAttemptedReconnect = false;
+
+var PIN_SHUTTER
+var PIN_AF
+var PIN_LED_RED
+var PIN_LED_GRN
+var PIN_LED_BLUE
+var PIN_LED_3MM
 
 
 //*** set permissions to local scripts ***//
-// var chmodx = exec('echo pi | sudo chmod -x ~/piFirmware/camera/gpioExport.sh && echo pi | sudo chmod -x ~/piFirmware/camera/gitpull.sh',
-// function(error,stdout,stderr){
-//   console.log('set chmod to all scripts');
-// })
+var chmodx = exec('chmod -x ~/piFirmware/camera/gpioExport.sh && chmod -x ~/piFirmware/camera/gitpull.sh',
+function(error,stdout,stderr){
+  console.log('set chmod to all scripts');
+})
 
 
 //*** EXECUTE EXPORT GPIO PIN SCRIPT ***//
 child = exec('bash ~/piFirmware/camera/gpioExport.sh',
   function(error,stdout,stderr){
     if(!error && !stderr){
-      console.log("GPIO pins EXPORTED GLOBALLY");
+
+      //*** SETUP PINS ***//
+      PIN_SHUTTER   = new Gpio(PIN[0], 'out');
+      PIN_AF        = new Gpio(PIN[1], 'out');
+      PIN_LED_RED   = new Gpio(PIN[2], 'out');
+      PIN_LED_GRN   = new Gpio(PIN[3], 'out');
+      PIN_LED_BLUE  = new Gpio(PIN[4], 'out');
+      PIN_LED_3MM   = new Gpio(PIN[5], 'out');
+      console.log("GPIO pins exported and inited");
+      bPinsInited = true;
     }else{
       console.log("error: "+error)
       console.log("stdout: "+stdout)
@@ -54,18 +77,14 @@ var rm = exec('rm -rf ~/*.jpg',function(error,stdout,stderr){
 
 console.log("WELCOME TO "+VERSION);
 
+
+
+
+
 //Init routine
-init()
-
-
-//*** SETUP PINS ***//
-var PIN_SHUTTER   = new Gpio(PIN[0], 'out');
-var PIN_AF        = new Gpio(PIN[1], 'out');
-var PIN_LED_RED   = new Gpio(PIN[2], 'out');
-var PIN_LED_GRN   = new Gpio(PIN[3], 'out');
-var PIN_LED_BLUE  = new Gpio(PIN[4], 'out');
-var PIN_LED_3MM   = new Gpio(PIN[5], 'out');
-console.log("GPIO pins inited");
+init(function(status){
+  console.log("INIT COMPLETE, CONNECTION STATUS: "+status);
+})
 
 
 //*** TETHER TO CAMERA ***//
@@ -95,7 +114,9 @@ http.createServer(function (req, res) {
           else response = JSON.stringify({"error":err})
 
           res.end(response)
-          tether.start()
+          //reconnect(function(){
+							tether.start()
+					//})
         })
 
     }else if(url_parts.pathname == '/get'){
@@ -108,16 +129,19 @@ http.createServer(function (req, res) {
           else response = JSON.stringify({"error":err})
 
           res.end(response)
-          tether.start()
-        })
+          //reconnect(function(){
+						tether.start()
+					//})
+         })
 
     }else if(url_parts.pathname == '/version'){
 
       res.end(JSON.stringify({"version":VERSION}));
 
     }else if(url_parts.pathname == '/init'){
-      init()
-      res.end(JSON.stringify({"init":"running"}))
+      init(function(status){
+        console.log("init status returned: "+status);
+      })
 
     }else if(url_parts.pathname =='/gitpull'){
       console.log('attemping git pull')
@@ -135,11 +159,39 @@ http.createServer(function (req, res) {
             }
         })
     }else if(url_parts.pathname=='/shutdown'){
+      res.end(JSON.stringify({"shutdown":"received"}));
       var child = exec('echo pi | sudo shutdown -h now',function(error,stdout,stderr){
         console.log('stdout: '+stdout)
         console.log('stderr: '+stderr)
       })
-    }else{
+    }else if(url_parts.pathname == '/trigger'){
+			hitShutter();
+			//res.
+      res.end(JSON.stringify({"trigger":"received"}));
+
+    }else if(url_parts.pathname == '/status'){
+			//hitShutter();
+			//res.
+      res.end(JSON.stringify({"status":bConnected}));
+    }else if(url_parts.pathname == '/reconnect'){
+    	if(bConnected){
+	    	res.end(JSON.stringify({"reconnect":bConnected}))
+    	}else{
+				reconnect(function(){
+					res.end(JSON.stringify({"reconnect":bConnected}))
+				})
+			}
+    }else if(url_parts.pathname == '/settings'){
+      fs.readFile(settingsFile,'utf8',function(err,data){
+        if(err) console.log(err)
+        else{
+          settingsData = JSON.parse(data)
+          res.end(JSON.stringify({"settings":settingsData}))
+        }
+      })
+      res.end(JSON.stringify({"settings":settingsData}))
+    }
+    else{
       res.end(JSON.stringify({error:"unrecognized"}))
     }
   }
@@ -149,22 +201,36 @@ console.log('Server running at 8080');
 
 //**** SET SETTINGS VALUE INTO CANNON ****//
 function setCameraConfigValue(key,val,cb){
-  console.log('gphoto2 --set-config '+key+"="+val)
-  var child = exec('gphoto2 --set-config '+key+"="+val,function(error, stdout, stderr){
+  console.log('gphoto2 --set-config-index '+key+"="+val)
+  var child = exec('gphoto2 --set-config-index '+key+"="+val,function(error, stdout, stderr){
 
       if(!error && !stderr){
         var obj = {}
         obj[key] = val
-        digitalWrite(PIN_LED_3MM, 0); //turn on RED led
-        //res.end(JSON.stringify(obj))
+        redLeds(0);
+
+        //-- update settings file
+        fs.readFile(settingsFile,'utf8',function(err,data){
+          if(err) console.log(err)
+          else{
+            settingsData = JSON.parse(data)
+            settingsData[key] = val;
+            console.log(JSON.stringify(settingsData))
+            saveSettings(settingsData);
+          }
+        })
+
         cb(null,JSON.stringify(obj))
       }else{
-        digitalWrite(PIN_LED_3MM, 1); //turn on RED led
+        redLeds(1);
+        // digitalWrite(PIN_LED_3MM, 1); //turn on RED led
         cb(stderr)
         //res.end(JSON.stringify({"error":stderr}))
       }
       console.log('restarting tethered')
-      //tether.start()
+      //reconnect(function(){
+      	//tether.start()
+      //})
     })
 }
 
@@ -182,10 +248,12 @@ function getCameraConfigValue(key,cb){
       var value = string.substr(currentLoc,end-currentLoc)
       var obj = {}
       obj[key] =value
-      digitalWrite(PIN_LED_3MM, 0); //turn off RED led
+      redLeds(0);
+      //digitalWrite(PIN_LED_3MM, 0); //turn off RED led
       cb(null,JSON.stringify(obj))
     }else{
-      digitalWrite(PIN_LED_3MM, 1); //turn on RED led
+      redLeds(1);
+      //digitalWrite(PIN_LED_3MM, 1); //turn on RED led
       cb(stderr)
     }
     //console.log('restarting tethered')
@@ -201,16 +269,30 @@ function Tether(){
   var _this = this
 
   this.start = function(){
+  		console.log("Starting tether");
       tethered =  spawn('gphoto2', ['--capture-tethered'])
+      redLeds(0);
+      //digitalWrite(PIN_LED_3MM,0); //turn red LED, we heard from camera
+      bConnected = true;
       tethered.stdout.on('data',function(data){
           //console.log(data.toString())
-          digitalWrite(PIN_LED_3MM,0); //turn red LED off to give the benefit of the doubt
+          var string = data.toString()
+
+          if(string.indexOf("Overwrite? [y|n] ") >-1){
+	          console.log("writing y")
+	          tethered.stdin.write('y\n')
+          }
+          redLeds(0);
+          //digitalWrite(PIN_LED_3MM,0); //turn red LED, we heard from camera
+          bConnected = true;
       })
       tethered.stderr.on('data',function(data){
         var string = data.toString()
 
         if(string.indexOf('.jpg')>-1){
-          digitalWrite(PIN_LED_3MM, 0);
+          redLeds(0);
+          // digitalWrite(PIN_LED_3MM, 0);
+          bConnected = true;
           if(string.indexOf('Deleting')>-1){
             console.log('Detected Photo')
             //console.log(string)
@@ -222,17 +304,32 @@ function Tether(){
             handleFile(filename)
           }
         }else if(string.indexOf('*** Error')>-1){
-          digitalWrite(PIN_LED_3MM, 1);
+          bConnected = false;
+          redLeds(1);
+          if(!bAttemptedReconnect){ //if we haven't tried reconnecting yet
+
+            reconnect(function(){
+              bAttemptedReconnect = true;
+            }); //try to reconnect
+          }
+          // digitalWrite(PIN_LED_3MM, 1);
           console.error(string)
         }
       })
       tethered.on('close',function(code){
-        digitalWrite(PIN_LED_3MM, 1);
+        redLeds(1);
+        // digitalWrite(PIN_LED_3MM, 1);
+        bConnected = false;
         console.log('Closed Tethered with code: '+code)
+/*
+        reconnect(function(){
+	        console.log("Reconnecting Tether")
+        })
+*/
       })
       this.kill = function(){
           console.log('killing tethering')
-          tethered.kill("SIGHUP")
+          tethered.kill("SIGTERM")
       }
       return tethered
   }
@@ -245,10 +342,10 @@ function Tether(){
 //**** hit shutter, take picture ****
 function hitShutter(){
   digitalWrite(PIN_SHUTTER, 1);
-  digitalWrite(PIN_BLUE, 1);
+  digitalWrite(PIN_LED_BLUE, 1);
   setTimeout(function(){
      digitalWrite(PIN_SHUTTER, 0);
-     digialWrite(PIN_BLUE, 0);
+     digitalWrite(PIN_LED_BLUE, 0);
   },300); //button press duration
 }
 
@@ -260,14 +357,33 @@ function hitAutoFocus(){
   },300); //button press duration
 }
 
-//**** digitalWrite function ****
-function digitalWrite(pin, state){
-  pin.write(state, function(err) { // Asynchronous write.
-    //pin.write(value === 0 ? 1 : 0, function(err) {
-      if (err) throw err;
-  });
+function redLeds(state){
+  digitalWrite(PIN_LED_RED, state);
+  digitalWrite(PIN_LED_3MM, state);
+  digitalWrite(PIN_LED_GRN, 0);
 }
 
+//**** digitalWrite function ****
+function digitalWrite(pin, state){
+  if(bPinsInited){
+    pin.write(state, function(err) { // Asynchronous write.
+    //pin.write(value === 0 ? 1 : 0, function(err) {
+      if (err) throw err;
+    });
+  } else console.log("PIN NOT INITED: "+pin);
+}
+
+function reconnect(callback){
+  console.log(">> attempting reconnect to camera");
+	hitAutoFocus();
+	setTimeout(function(){
+    hitAutoFocus()
+    setTimeout(function(){
+      tether.start()
+        setTimeout(function(){callback()},1000);
+      },1000);
+  }, 1000);
+}
 
 //**** HANDLE FILE ****
 function handleFile(filename){
@@ -305,38 +421,53 @@ function saveSettings(newSettings){
 }
 
 /*** INIT THE CAMERA ***/
-function init(){
+function init(callback){
   console.log("Camera Init")
-  fs.exists(settingsFile, function(exists){
-    if(exists){ //we have a serial file
-      console.log("found settings file");
-      fs.readFile(settingsFile,'utf8',function(err,data){
-        if(err) console.log(err)
-        else{
-          var settingsData = JSON.parse(data)
-          console.log(JSON.stringify(settingsData))
-          saveAndReport(settingsData)
-        }
-      })
-    }else{//no serial file
-        console.log("SETTINGS.js NOT FOUND. creating settings file:");
-        var mySettings = {
-          "piFirmware_version":VERSION,
-          "serial": "NaN"
-        }
-        saveAndReport(mySettings)
-        //saveSettings(mySettings);
+  //digitalWrite(PIN_LED_3MM, 1); //write pin to high
+	//hitAutoFocus()
+	//reconnect(function(){
+	  fs.exists(settingsFile, function(exists){
+	    if(exists){ //we have a serial file
+	      console.log("found settings file");
+	      fs.readFile(settingsFile,'utf8',function(err,data){
+	        if(err) console.log(err)
+	        else{
+	          settingsData = JSON.parse(data)
+            settingsData.piFirmware_version = VERSION;
+            if(settingsData.hasOwnProperty('piFirmware_version')){
 
-    }
-  })
+            }else settingsData.piFirmware_version = VERSION
+            if(settingsData.hasOwnProperty('serial')){
+
+            }else settingsData.serial = "NaN"
+	          console.log(JSON.stringify(settingsData))
+	          saveAndReport(settingsData, function(status){
+	            callback(status);
+	          })
+	        }
+	      })
+	    }else{//no serial file
+	        console.log("SETTINGS.js NOT FOUND. creating settings file:");
+	        var mySettings = {
+	          "piFirmware_version":VERSION,
+	          "serial": "NaN"
+	        }
+	        saveAndReport(mySettings, function(status){
+	          callback(status);//res.end(JSON.stringify({"init":"running", "connection_status":status}))
+	        })
+	        //saveSettings(mySettings);
+	    }
+	  })
+  //});
 }
 
-function saveAndReport(settingsData){
-   console.log(settingsData)
+function saveAndReport(settingsData, cb){
+   console.log(settingsData);
    //check for serial number from camera
     tether.kill();
     getCameraConfigValue('eosserialnumber',function(err,val){
       if(!err){
+        //WE ARE CONNECTED TO THE CAMERA !!
         var data = JSON.parse(val)
         settingsData.serial = data.eosserialnumber;
         console.log(settingsData)
@@ -346,16 +477,19 @@ function saveAndReport(settingsData){
           // handle response
           console.log(data)
         });
+        cb(true);
       }else{
         console.log(err)
-
         if(settingsData.serial == "NaN" ) saveSettings(settingsData)
 
         restler.postJson('http://'+BROWSER_IP+':3000/camera', settingsData).on('complete',function(data, response){
           // handle response
           console.log(data)
         });
+        cb(false);
       }
-      tether.start()
+      //reconnect(function(){
+      	tether.start()
+      //})
     })
 }

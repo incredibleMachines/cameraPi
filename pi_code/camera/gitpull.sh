@@ -4,6 +4,8 @@ cd ~/piFirmware
 
 spawn git fetch local master
 
+set timeout 90
+
 expect "Password:" {
 	send "git\r"
 }
