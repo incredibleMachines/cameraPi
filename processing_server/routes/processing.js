@@ -22,7 +22,7 @@ var totalCams = 23
 var width = 4272/960
 var height = 2848/640
 
-var take;
+var take='';
 var length = 10
 var numJpgs = 0;
 
@@ -60,7 +60,7 @@ queue.drain = function(){
             var outputFinalPath=localPath+"/"+take+"/output/"+take+".mov"
             for(var i=0;i<files.length;i++){
 
-              filestring+='file \''+localPath+'/'+take+'/renamed/'+i+'.mov\' \n'
+              filestring+='file \''+localPath+'/'+take+'/renamed/'+i+'.mov\'\n'
 
             }
             fs.writeFile(localPath+'/'+take+'/renamed/mylist.txt', filestring, function(err) {
@@ -68,7 +68,7 @@ queue.drain = function(){
                   console.log(err);
               } else {
                   console.log("The file was saved!");
-                  var concat = "ffmpeg -f concat -i mylist.txt -c copy "+outputFinalPath
+                  var concat = "/usr/local/bin/ffmpeg -f concat -i mylist.txt -c copy "+outputFinalPath
                   exec(concat,function(error,stdout,stderr){
                     if(!error){
                       console.log("Final Video Rendered! ENJOY!")
@@ -157,6 +157,7 @@ function processOutput(file,cb){
 
 exports.cropImages = function(){
   return function(req,res){
+    take='';
     take=req.param('take')
     console.log("process began")
     console.log(localPath+"/"+take)
