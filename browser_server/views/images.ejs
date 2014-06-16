@@ -19,6 +19,13 @@
 <input type="submit" value="Change Camera">
 </form>
 
+<form id="onion skin" method="get" action="/set-camera">
+<strong>Set Onion:</strong>
+<input type="checkbox" id="before" value="before">-1 Frame</input>
+<input type="checkbox" id="after" value="after">+1 Frame</input>
+<input type="submit" value="Update Onion">
+</form>
+
 
 <form id="save-image" method="post" action="/save-image">
 <input type="hidden" name="current" value=<%= currentCamera%>>
@@ -31,6 +38,10 @@
 <input type="hidden" name="3X" id="3X" value="">
 <input type="hidden" name="3Y" id="3Y" value="">
 <input type="submit" value="Save Settings">
+</form>
+
+<form id="save-centered" action="/cameras/images/center" method="post">
+	<input type="submit" value="Reset Center">
 </form>
 
 <script src='/js/vendor/jquery-2.0.3.min.js'></script>

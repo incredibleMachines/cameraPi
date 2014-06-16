@@ -1,5 +1,6 @@
-var editPoints
+var editPoints, prevPoints, nextPoints
 var currentCamera='001'
+var totalCam=111
 
 // var DOWNLOAD_IP='192.168.0.2'
 var DOWNLOAD_IP='localhost'
@@ -32,10 +33,10 @@ $(document).ready(function(){
 	var c=document.getElementById("image-editor")
 	var ctx=c.getContext("2d")
 	var img=new Image()
+	var prevImg=new Image()
+	var nextImg=new Image()
 
 	var selected=null
-
-
 
 	$('#psr').click(function(){
 		method="psr"
@@ -58,6 +59,13 @@ $(document).ready(function(){
 		}
 
 		img.src = "http://"+DOWNLOAD_IP+":3001/calibration/"+currentCamera+".jpg"
+
+		if(currentCamera!=0){
+			prevImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+currentCamera-1+".jpg"
+		}
+		if(currentCamera!=totalCameras-1){
+			nextImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+currentCamera-1+".jpg"
+		}
 
 		$(document).click(function(event){
 		if(method=="quad"){

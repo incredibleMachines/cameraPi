@@ -134,11 +134,11 @@ exports.initCamera = function(_settings,MongoDB){
 		console.log(req.body)
 		http.get('http://'+post.address+':8080/init', function(server){
 			console.log("Got response: " + res.statusCode)
-			console.log("From: "+_data[0].address)
+			console.log("From: "+post.address)
 			res.redirect('/cameras/list')
 		}).on('error', function(e) {
 				console.log("Got error: " + e.message)
-				console.log("From: "+_data[0].address)
+				console.log("From: "+post.address)
 				res.jsonp({"error":e.message})
 		});//end http.get
 	}//end return function
@@ -393,6 +393,9 @@ exports.saveSetting=function(MongoDB){
 										console.log('http://'+___doc.address+':8080/set?'+key+'='+post[key])
 										http.get('http://'+___doc.address+':8080/set?'+key+'='+post[key], function(___res){
 											console.log("Got response: " + ___res.statusCode)
+											___res.on('data',function(chunk){
+												console.log("Got Data: "+chunk)
+											})
 											console.log("From: "+___doc.address)
 										}).on('error', function(____e) {
 												console.log("Got error: " + ____e.message)

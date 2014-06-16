@@ -5,8 +5,6 @@ var gm = require('gm')
 var exec = require('child_process').exec
 var currentCamera='001'
 
-
-
 var width = 4272/960
 var height = 2848/640
 
@@ -28,6 +26,18 @@ exports.renderPage = function (MongoDB){
 		})//MongoDB.getAll
 	}//return function
 }//renderPage
+
+exports.saveCentered = function(MongoDB){
+	return function(req,res){
+		var json=[{"x":160,"y":0},{"x":800,"y":0},{"x":800,"y":640},{"x":160,"y":640}]
+		MongoDB.update('cameras',{camera_id:currentCamera},{$set:{warp:json}},function(_e,_data){
+				if(!_e){
+					console.log("crop for camera "+currentCamera+" saved!")
+					res.redirect("/images")
+				}else console.log(_e)
+			})//if(!_e)
+		}//return function
+}
 
 exports.setCamera = function(){
 	return function (req,res){

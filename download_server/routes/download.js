@@ -19,7 +19,7 @@ var imagetotal = 20
 
 var timedPhoto
 
-var method="calibration"
+var method="armed"
 
 var live=0
 var recording=false

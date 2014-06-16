@@ -33,7 +33,7 @@ if ('development' == app.get('env')) {
 var imageCounter = 0;
 
 
-app.get('/',processing.cropImages())
+app.get('/',processing.process())
 // app.get('/render',processing.renderVideo())
 
 

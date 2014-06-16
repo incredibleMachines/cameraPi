@@ -1,11 +1,10 @@
 
-var BROADCAST_IP = "192.168.0.255"
+var BROADCAST_IP = "192.168.0.255"//"192.168.0.255"
 var MULTICAST_IP = "230.185.192.108"
-var SEND_LASER_IP = "192.168.0.199"
+var SEND_LASER_IP = "192.168.0.199" //STUART
 var SEND_LASER_PORT = 7999
-//var TRIGGER_IP = "192.168.0.43"//CHRIS' IP
 var TRIGGER_IP = "192.168.0.3" //TRUE IP
-var BROWSER_IP = "192.168.0.4"
+var BROWSER_IP = "192.168.0.2"
 
 var PORT = 41234
 
@@ -21,50 +20,113 @@ var serialNumber;
 //[SHUTTER, AF, RED, GRN, BLUE, 3MM, LASER]
 var PIN = [4, 17, 24, 27, 25, 22, 23];
 var picCt = 0;
-var laserLeader = true;
+var laserEnable = false;
+var laserLocal = false;
 var triggerCt = 0;
 var triggerState = 0; //prevent false triggers
 var triggerBufferTime = 1500; //how long to wait before next trigger
+var bPinsInited = false;
+
+var PIN_SHUTTER
+var PIN_AF
+var PIN_LED_RED
+var PIN_LED_GRN
+var PIN_LED_BLUE
+var PIN_LED_3MM
+var PIN_LASER
+
+//for settings file
+var settingsFile = __dirname + '/../camera/settings.json';
+var settingsData;
 
 
-//*** SETUP PINS
-var PIN_SHUTTER   = new Gpio(PIN[0], 'out');
-var PIN_AF        = new Gpio(PIN[1], 'out');
-var PIN_LED_RED   = new Gpio(PIN[2], 'out');
-var PIN_LED_GRN   = new Gpio(PIN[3], 'out');
-var PIN_LED_BLUE  = new Gpio(PIN[4], 'out');
-var PIN_LED_3MM   = new Gpio(PIN[5], 'out');
-var PIN_LASER     = new Gpio(PIN[6], 'in', 'rising');
-var standbyLed    = PIN_LED_GRN;
+//*** set permissions to local scripts ***//
+var chmodx = exec('chmod -x ~/piFirmware/camera/gpioExport.sh',
+function(error,stdout,stderr){
+  console.log('set chmod to all scripts');
+})
 
-//setTimeout(function(){
-   configLaser(laserLeader); //config as default
- //},3000); //wait a second for Gpio(pin) to config first
+
+//*** EXECUTE EXPORT GPIO PIN SCRIPT ***//
+child = exec('bash ~/piFirmware/camera/gpioExport.sh',
+  function(error,stdout,stderr){
+    if(!error && !stderr){
+
+      //*** SETUP PINS ***//
+      PIN_SHUTTER   = new Gpio(PIN[0], 'out');
+      PIN_AF        = new Gpio(PIN[1], 'out');
+      PIN_LED_RED   = new Gpio(PIN[2], 'out');
+      PIN_LED_GRN   = new Gpio(PIN[3], 'out');
+      PIN_LED_BLUE  = new Gpio(PIN[4], 'out');
+      PIN_LED_3MM   = new Gpio(PIN[5], 'out');
+      PIN_LASER     = new Gpio(PIN[6], 'in', 'rising');
+      console.log("GPIO pins exported and inited");
+      // configLaser(laserEnable);
+      bPinsInited = true;
+    }else{
+      console.log("error: "+error)
+      console.log("stdout: "+stdout)
+      console.log("stderr: "+stderr)
+    }
+  }
+);
+
+//LOOK FOR SETTINGS FILE
+fs.exists(settingsFile, function(exists){
+  if(exists){ //we have a serial file
+    console.log("found settings file");
+    fs.readFile(settingsFile,'utf8',function(err,data){
+      if(err) console.log(err)
+      else{
+        settingsData = JSON.parse(data)
+        // configLaser(laserEnable);
+        if(settingsData.hasOwnProperty('laser_enable')){
+          laserEnable = parseInt(settingsData.laser_enable);
+          configLaser(laserEnable);
+        }
+        if(settingsData.hasOwnProperty('laser_local')){
+          laserLocal = parseInt(settingsData.laser_local);
+        }
+        console.log(JSON.stringify(settingsData))
+      }
+    })
+  }else{//no serial file
+    settingsData = {}; //just make an empty object
+    //do nothing. camerajs creates if needed.
+  }
+})
 
 
 //** CONFIGURE LASER **
 function configLaser(job){
-  laserLeader = job;
-  digitalWrite(standbyLed, 0);
+  console.log("hit configLaser, job: "+job);
+  laserEnable = job;
+  digitalWrite(PIN_LED_GRN, 0);
 
-  if(laserLeader){ //watch sensor!
+  if(laserEnable){ //watch sensor!
     //** set watch with callback on laserpin RISING
     PIN_LASER.watch(function(err, value) {
         //console.log("LASER TRIP RISING DETECTED");
         laserTriggered();
     });
     console.log(">> Running Laser.js, configured as GROUP LEADER <<");
-    standbyLed = PIN_LED_GRN;
+    setTimeout(function(){
+      digitalWrite(PIN_LED_GRN, 1);
+    }, 2000); //wait two seconds and turn on
+
   } else {
-    PIN_LASER.unexport(); //**ONLY IF WE ARE NOT A LEADER**
-    standbyLed = PIN_LED_BLUE;
+    console.log(">> configured as group MEMBER");
+    digitalWrite(PIN_LED_GRN, 0);
+    //PIN_LASER.unexport(); //**ONLY IF WE ARE NOT A LEADER**
+    //standbyLed = PIN_LED_BLUE;
   }
+
 }
 
 
 //** LASERTRIGGERED - what to do when a trip is detected **
 function laserTriggered(){
-  if(!triggerState){ //make sure we don't trigger a bunch of times in a row
+  if(!triggerState && laserEnable){ //make sure we don't trigger a bunch of times in a row
 
     //*** REPORT TRIGGER OBJECT TO SERVER HERE
     var message = new Buffer("1");
@@ -76,7 +138,7 @@ function laserTriggered(){
     triggerCt++;
     console.log("trip detected, count: "+triggerCt);
     triggerState = true
-    // hitShutter();
+    if(laserLocal) hitShutter();
     digitalWrite(PIN_LED_GRN, 1);
     // digitalWrite(standbyLed, 0);
     setTimeout(function(){
@@ -103,6 +165,51 @@ client.on("message", function (msg, rinfo) {
     hitShutter(); //*** TAKE PICTURE !!
     console.log("trigger shutter, count "+ (picCt++));
   }
+  else if(data=='af'){
+    hitAutoFocus();
+    console.log("trigger autoFocus");
+  }
+  else if(data=='laser1'){
+    console.log('recvd laser1');
+    configLaser(true);
+
+    settingsData.laser_enable = 1;
+    console.log("new settings: "+JSON.stringify(settingsData))
+    saveSettings(settingsData);
+  }
+  else if(data=='laser0'){
+    console.log('recvd laser0');
+    configLaser(false);
+
+    settingsData.laser_enable = 0;
+    console.log("new settings: "+JSON.stringify(settingsData))
+    saveSettings(settingsData);
+  }
+  else if(data=='laserlocal1'){
+    console.log('recvd laserlocal1')
+    laserLocal = true;
+    //-- update settings file
+    settingsData.laser_local = 1;
+    console.log("new settings: "+JSON.stringify(settingsData))
+    saveSettings(settingsData);
+  }
+  else if(data=='laserlocal0'){
+    console.log('recvd laserlocal0')
+    laserLocal = false;
+    //-- update settings file
+    settingsData.laser_local = 0;
+    console.log("new settings: "+JSON.stringify(settingsData))
+    saveSettings(settingsData);
+  }
+  // else if(data=='getstatus'){
+    //*** REPORT TRIGGER OBJECT TO SERVER HERE
+    // var message = new Buffer("1");
+    // client.send(message,0,message.length,SEND_LASER_PORT,SEND_LASER_IP,function(err,bytes){
+    //   if(err) console.log("error sending laser trip: "+err);
+    //   else console.log("sent laser message");
+    // })
+  // }
+
 });
 
 
@@ -144,10 +251,12 @@ function hitAutoFocus(){
 
 //** digitalWrite function
 function digitalWrite(pin, state){
-  pin.write(state, function(err) { // Asynchronous write.
+  if(bPinsInited){
+      pin.write(state, function(err) { // Asynchronous write.
     //pin.write(value === 0 ? 1 : 0, function(err) {
-      if (err) throw err;
-  });
+        if (err) throw err;
+    });
+  } else console.log("PIN NOT INITED: "+pin);
 }
 
 
@@ -204,6 +313,16 @@ process.on('message',function(msg){
 
   }
 })
+
+
+//*** SAVE SETTINGS on boot or later when received from server ***//
+function saveSettings(newSettings){
+  fs.writeFile(settingsFile, JSON.stringify(newSettings), function(err){
+    if(err) console.log("err in saveSettings: "+err);
+    else console.log("saved settings file!");
+  });
+}
+
 
 process.on('SIGHUP', function() {
   console.log(' Got SIGHUP closing gpio')
