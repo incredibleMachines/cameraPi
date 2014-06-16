@@ -34,12 +34,9 @@ var numJpgs = 0;
 var localPath =  "/Users/IM_Laptop_01/Documents/cameraPi/processing_server/images"
 var remotePath =  "/Users/IM_Laptop_01/Documents/cameraPi/download_server/images"
 
-
-
 getCameras(function(_deviceList){
   deviceList = _deviceList
 })
-
 
 var concurrency = 4
 
@@ -194,58 +191,56 @@ exports.process = function(){
     take=req.param('take')
     console.log("begin processing on folder: "+localPath+"/"+take)
     rimraf(localPath+"/"+take, function(e){
-
       if(e) console.error(e)
       else{
-      fs.mkdir(localPath+"/"+take,function(_e){
-        console.log("making local take folder")
-        if(e) console.error(_e)
-        else{
-        fs.mkdir(localPath+"/"+take+"/originals",function(__e){
-          console.log("making local originals folder")
-          if(_e) console.error(__e)
+        fs.mkdir(localPath+"/"+take,function(_e){
+          console.log("making local take folder")
+          if(e) console.error(_e)
           else{
-        exec("cp -R "+remotePath+"/"+take+"/ "+localPath+'/'+take+'/originals', function(err,stdout,stderr){
-          if(err)console.error("mv command error "+err)
-          if(stderr) console.error(stderr)
 
-          fs.mkdir(localPath+"/"+take+"/cropped",function(){})
-          fs.mkdir(localPath+"/"+take+"/warped",function(){})
-          fs.mkdir(localPath+"/"+take+"/movs",function(){})
-          fs.mkdir(localPath+"/"+take+"/renamed",function(){})
-          fs.mkdir(localPath+"/"+take+"/output",function(){})
+            fs.mkdir(localPath+"/"+take+"/originals",function(__e){
+              console.log("making local originals folder")
+              if(_e) console.error(__e)
+              else{
+                exec("cp -R "+remotePath+"/"+take+"/ "+localPath+'/'+take+'/originals', function(err,stdout,stderr){
+                  if(err)console.error("mv command error "+err)
+                  if(stderr) console.error(stderr)
 
-          fs.readdir(localPath+"/"+take+"/originals", function(err, files){
-            //console.log("Processing: "+)
-            var counter = 0;
-            console.log(files.length)
-            queue.push(files,function(err){
-                counter++
-                if(err) {
-                  console.log("push error")
-                  console.error(err)
-                }
-                else console.log('finished queue item: '+ counter)
-            })//queue.push
+                  fs.mkdir(localPath+"/"+take+"/cropped",function(){})
+                  fs.mkdir(localPath+"/"+take+"/warped",function(){})
+                  fs.mkdir(localPath+"/"+take+"/movs",function(){})
+                  fs.mkdir(localPath+"/"+take+"/renamed",function(){})
+                  fs.mkdir(localPath+"/"+take+"/output",function(){})
 
-            if(err){
-              console.log(err)
-            }
+                  fs.readdir(localPath+"/"+take+"/originals", function(err, files){
+                    //console.log("Processing: "+)
+                    var counter = 0
+                    console.log(files.length)
+                      queue.push(files,function(_err){
+                          counter++
+                          if(err) {
+                            console.log("push error")
+                            console.error(_err)
+                          }
+                          else console.log('finished queue item: '+ counter)
+                      })//queue.push
 
-            else{
-                console.log("filenumber: "+files)
-                console.log("length: "+totalCams)
-            }
-          })//end fs read directory
-        })//end exec cp
-      }//endif (__e)
-    })//fs.mkdir originals
-  }//endif(_e)
-  })//fs.mkdir take
-}//endif(e)
-})//rimraf
+                      if(err){
+                        console.log(err)
+                      }
 
-    //})//
+                      else{
+                          console.log("filenumber: "+files)
+                          console.log("length: "+totalCams)
+                      }
+                    })//end fs read directory
+                  })//end exec cp
+              }//endif (__e)
+            })//fs.mkdir originals
+          }//endif(_e)
+        })//fs.mkdir take
+      }//endif(e)
+    })//rimraf
   }//return function
 }//process()
 
