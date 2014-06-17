@@ -2,6 +2,9 @@
 <% include includes/header %>
 
 <canvas id="image-editor" width="960" height="640"></canvas>
+<canvas id="image-output" width="640" height="640"></canvas>
+<canvas id="image-previous" width="960" height="640" style="display:none"></canvas>
+<canvas id="image-next" width="960" height="640" style="display:none"></canvas>
 
 <form id="select-edit-method">
 <input type="radio" id="psr" value="psr" checked>Position, Scale, Rotate</input>
@@ -19,25 +22,24 @@
 <input type="submit" value="Change Camera">
 </form>
 
-<form id="onion skin" method="get" action="/set-camera">
-<strong>Set Onion:</strong>
-<input type="checkbox" id="before" value="before">-1 Frame</input>
-<input type="checkbox" id="after" value="after">+1 Frame</input>
-<input type="submit" value="Update Onion">
+<form id="onion-skin">
+	<strong>Set Onion:</strong>
+	<input type="checkbox" id="before" value="before">-1 Frame</input>
+	<input type="checkbox" id="after" value="after">+1 Frame</input>
 </form>
 
 
 <form id="save-image" method="post" action="/save-image">
-<input type="hidden" name="current" value=<%= currentCamera%>>
-<input type="hidden" name="0X" id="0X" value="">
-<input type="hidden" name="0Y" id="0Y" value="">
-<input type="hidden" name="1X" id="1X" value="">
-<input type="hidden" name="1Y" id="1Y" value="">
-<input type="hidden" name="2X" id="2X" value="">
-<input type="hidden" name="2Y" id="2Y" value="">
-<input type="hidden" name="3X" id="3X" value="">
-<input type="hidden" name="3Y" id="3Y" value="">
-<input type="submit" value="Save Settings">
+	<input type="hidden" name="current" value=<%= currentCamera%>>
+	<input type="hidden" name="0X" id="0X" value="">
+	<input type="hidden" name="0Y" id="0Y" value="">
+	<input type="hidden" name="1X" id="1X" value="">
+	<input type="hidden" name="1Y" id="1Y" value="">
+	<input type="hidden" name="2X" id="2X" value="">
+	<input type="hidden" name="2Y" id="2Y" value="">
+	<input type="hidden" name="3X" id="3X" value="">
+	<input type="hidden" name="3Y" id="3Y" value="">
+	<input type="submit" value="Save Settings">
 </form>
 
 <form id="save-centered" action="/cameras/images/center" method="post">

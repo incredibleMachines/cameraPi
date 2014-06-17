@@ -10,7 +10,7 @@ var height = 2848/640
 
 exports.renderPage = function (MongoDB){
 
-	return function(req,res){
+	return function(req,res,next){
 		MongoDB.getAll('cameras', function(e, _data){
 			if(!e){
 			// console.log(_data)

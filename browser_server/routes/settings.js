@@ -416,7 +416,6 @@ exports.saveSetting=function(MongoDB){
 		// 	else console.log("settings save to camera master")
 		// })
 
-
 		}//endif (selectAll==true)
 	}//return function
 }//saveSettings()
