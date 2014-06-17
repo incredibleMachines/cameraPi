@@ -4,7 +4,12 @@
   <head>
     <title><%= locals.title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/css/vendor/bootstrap.min.css' />
     <link rel='stylesheet' href='/css/style.css'/>
 </head>
 <body>
-<nav><a href="/cameras/settings">SETTINGS</a><a href="/cameras/list">HARDWARE</a><a href="/controller">TRIGGER</a></nav>
+  <nav>
+      <a class="btn btn-default" href="/cameras/settings">SETTINGS</a>
+      <a class="btn btn-default" href="/cameras/list">HARDWARE</a>
+      <a class="btn btn-default" href="/controller">TRIGGER</a>
+  </nav>

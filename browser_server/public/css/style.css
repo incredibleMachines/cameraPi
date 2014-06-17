@@ -1,11 +1,51 @@
-body{
-	font-family: Helvetica, sans-serif
+html, body{
+	width:100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
-nav a{
-	padding:10px;
-	color:#000;
+section#cameras-index{
+		width: 100%;
+		height: auto;
+		margin: 0 auto;
+		padding-bottom: 80px
 }
+
+ul#cameras{
+	margin: 10px auto;
+}
+ul.camera{
+
+	min-height: 80px;
+	margin: 0 40px;
+}
+ul.camera li{
+		display:inline;
+		height: 40px;
+
+}
+
+li.camera.offline{
+	background-color: #B2B2B2;
+}
+
+li.camera.connected{
+	background-color: #CCF5CC;
+}
+li.camera.disconnected{
+	background-color: #FF8080;
+}
+
+ul.camera li h5{
+		display:inline;
+
+}
+
+ul.camera li h5 .input-group input{
+	display: inline;
+	margin: 0;
+	padding: 0;
 
 
 /* CONTROLLER PAGE FRONT END FOR ADMINS*/

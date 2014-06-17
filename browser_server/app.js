@@ -3,6 +3,7 @@ var fs = require('fs');
 var less = require('less-middleware');
 var path = require('path');
 var http = require('http');
+var _ = require('underscore');
 
 var MasterSettings = require(__dirname +'/modules/loadSettings.js');
 var Database = require(__dirname+'/modules/dbConnection.js');
@@ -14,6 +15,10 @@ var app = express();
 var settings=require( __dirname +'/routes/settings');
 var controls=require( __dirname +'/routes/controls');
 var images=require( __dirname +'/routes/images');
+var cameras = require( __dirname+'/routes/cameras')
+
+
+app.locals._ = _
 
 app.set('port', process.env.PORT || 3000);
 app.set('title', 'Camera Controller');
@@ -59,6 +64,9 @@ app.post('/cameras/init',settings.initCamera())
 app.post('/scanned',controls.scan())
 app.get('/send-armed',controls.sendArmed(Database))
 app.post('/cameras/images/center',images.saveCentered(Database))
+
+
+app.get('/cameras/all',cameras.index(Database))
 
 http.createServer(app).listen(app.get('port'), function(){
 	  console.log('Express server listening on port ' + app.get('port').toString());

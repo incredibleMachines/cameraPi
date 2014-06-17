@@ -5,6 +5,7 @@ var express = require('express');
 
 
 var MULTICAST_IP = "230.185.192.108";
+var BROADCAST_IP = "192.168.0.255"
 var BROWSER_IP = 'http://192.168.0.4' //'http://10.0.1.28'//
 
 var DEVICES = []
