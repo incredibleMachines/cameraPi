@@ -46,4 +46,25 @@ ul.camera li h5 .input-group input{
 	display: inline;
 	margin: 0;
 	padding: 0;
+
+
+/* CONTROLLER PAGE FRONT END FOR ADMINS*/
+
+#arm-cameras input[type="submit"]{
+	margin:40px;
+	float:left;
+	width:100px;
+	font-size:100px;
+	padding:200px;
+}
+
+#camera-status{
+	float:left;
+	margin:40px;
+}
+
+#trigger-cameras input{
+	margin:40px;
+	float:left;
+	width:100px;
 }
