@@ -1,5 +1,20 @@
-	
-	  <script src='/js/main.js'></script>
-
+		<script src='/js/vendor/jquery-2.0.3.min.js'></script>
+		<% if(title == "Cameras Index"){ %>
+				<script src="/js/vendor/underscore-1.6.0.min.js"></script>
+				<script src='/js/cameraController.js'></script>
+				<script>
+				$(document).ready(function(){
+					console.log('this')
+					var cameraController = new CameraController(<%-JSON.stringify(cameras) %>)
+				})
+				</script>
+		<% }else if(title == 'Camera-Setting'){ %>
+			<script src="/js/settingsController.js"></script>
+			<script>
+				var settingsController = new SettingsController(<%- JSON.stringify(cameras) %>)
+			</script>
+		<% }else{ %>
+			<script src='/js/main.js'></script>
+		<% } %>
   </body>
 </html>

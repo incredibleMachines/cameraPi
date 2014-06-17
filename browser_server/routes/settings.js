@@ -98,10 +98,10 @@ exports.load =  function(MongoDB){
 								MongoDB.getAll('cameras', function(___e, ___data){
 								if(!___e){
 										console.log(___data)
-										___data=sortByKey(_data,'camera_id')
+										___data=sortByKey(___data,'camera_id')
 										res.render('camera-settings', {
 											settings: current,
-											cameras:___data,
+											cameras: ___data,
 											currentCamera:currentCamera,
 											title: "Camera-Setting",
 											header: "Camera Settings!"
