@@ -59,7 +59,7 @@ app.get('/broadcast', function(req, res){
   /* TO DO: */
   /* SEND COMMAND OVER BROADCAST/MULTICASTING */
   var message = new Buffer('go');
-  server.send(message,0,message.length,41234,MULTICAST_IP)
+  server.send(message,0,message.length,41234,BROADCAST_IP)
   res.send('sending image trigger');
 })
 
