@@ -13,7 +13,7 @@
                   </span>
                   <input class="form-control" name="camera_id" value="<%=camera.camera_id%>"></input>
                   <span class="input-group-btn">
-                  <button name="camera_id" class="btn btn-default">Update</button>
+                  <button name="camera_id" class="btn btn-default">Update(WIP)</button>
                   </span>
                 </section>
               </h4>
@@ -26,10 +26,16 @@
               </div>
             </li>
             <% if(camera.delay !== 'undefined'){ %><li class="col-md-2">Delay: <%= camera.delay %></li><% } %>
-            <li class="col-md-1"><button name="reconnect" class="reconnect btn btn-default">reconnect</button></li>
-            <li class="col-md-1"><button name="status" class="status btn btn-default">get status</button></li>
-            <li class="col-md-1"><button name="reboot" class="reboot btn btn-default">reboot</button></li>
-            <li class="col-md-1"><button name="shutdown" class="shutdown btn btn-default">shutdown</button></li>
+            <li class="col-md-1">
+              <button name="status" class="status btn btn-default">get status</button>
+              <button name="reconnect" class="reconnect btn btn-default">reconnect</button>
+            </li>
+            <li class="col-md-1">
+              <button name="reboot" class="reboot btn btn-default">reboot</button>
+              <button name="shutdown" class="shutdown btn btn-default">shutdown</button></li>
+            <li class="col-md-1">
+              <button name="gitpull" class="gitpull btn btn-default">gitpull</button></li>
+            </li>
           </ul><!--.camera -->
           <div class="camera-settings">
 
@@ -48,6 +54,18 @@
       </li>
       <li>
         <button type="button" class="btn btn-default navbar-btn git-pull-all">Git Pull All</button>
+      </li>
+      <li>
+        <button type="button" class="btn btn-default navbar-btn ready-all">Ready All</button>
+      </li>
+      <li>
+        <button type="button" class="btn btn-default navbar-btn trigger-all">Trigger</button>
+      </li>
+      <li>
+          <button type="button" class="btn btn-default navbar-btn broadcast">Broadcast</button>
+      </li>
+      <li>
+          <button type="button" class="btn btn-default navbar-btn process">Process</button>
       </li>
     </ul>
 </nav>

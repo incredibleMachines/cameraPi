@@ -128,7 +128,16 @@ exports.load =  function(MongoDB){
 }//return function
 }//function load()
 
+exports.getStatus = function(MongoDB){
+	return function(req,res){
+
+
+
+	}//end req,res
+}
+
 exports.initCamera = function(_settings,MongoDB){
+	//to do process camera init response
 	return function(req,res){
 		var post=req.body
 		console.log(req.body)
@@ -301,6 +310,7 @@ function updateCameraOnSave(_MongoDB,_doc,post,cb){
 		// res.redirect('/cameras/list')
 	})//end MongoDB.update('cameras')
 }
+
 
 exports.armCameras = function (MongoDB){
 	return function(req,res){

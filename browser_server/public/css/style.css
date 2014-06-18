@@ -36,6 +36,9 @@ li.camera.connected{
 li.camera.disconnected{
 	background-color: #FF8080;
 }
+li.camera.ready{
+	background-color: #ADC2FF;
+}
 
 ul.camera li h5{
 		display:inline;

@@ -19,11 +19,14 @@ var imagetotal = 20
 
 var timedPhoto
 
-var method="calibration"
+var method="calibration" //or "armed"
 
 var live=0
 var recording=false
 var take='st_12345'
+
+var incomingCaptureCount = {};
+
 
 exports.startProcessing=function(){
     return function(req,res){
@@ -36,7 +39,6 @@ exports.startProcessing=function(){
 
 exports.initDownload= function(){
   return function(req,res){
-    res.jsonp({"inited":"true"})
     var info = ''
 
     http.get('http://'+BROWSER_IP+':3000/getinfo',function(_res){
@@ -57,8 +59,13 @@ exports.initDownload= function(){
 
         if(method==="armed"){
           take=new Date().getTime()
+          res.jsonp({"inited":"true","take":take})
+
           fs.mkdir('images/'+take,function(){
             currentDirectory='images/'+take
+
+            incomingCaptureCount = {};
+
             imagecount=0
             console.log("current: "+currentDirectory)
 
@@ -68,7 +75,7 @@ exports.initDownload= function(){
 
             http.get('http://'+BROWSER_IP+':3000/send-armed?takeawayID='+take+'&participantCode='+req.param('participantCode'),function(__res){
               console.log("sent arm data")
-              // res.jsonp({"sent":"success"})
+              //res.jsonp({"sent":"success"})
             }).on('error',function(e){
               console.error(e)
             })//http.get
@@ -92,7 +99,7 @@ exports.saveImage = function(){
   return function (req,res) {
 
 
-      console.log("hit")
+      console.log(method)
 
       res.jsonp({post:"armed"})
       //console.log(req)
@@ -113,21 +120,47 @@ exports.saveImage = function(){
       camera_id=camera['camera_id']
 
       console.log(currentDirectory)
-      fs.rename(__dirname+'/../'+image.path,__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg',  function(err){
-          imagecount++;
-          if(err) console.error(err)
-          console.log('Image Saved.')
+      if(camera_id !== "NULL"){
+        if(method == 'calibration'){
+          var filename = camera_id+'_'+incomingCaptureCount[camera.camera_id]
 
-          // exec("cp "+__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg '+__dirname+'/../public/calibration/'+camera_id+'.jpg',function(err,stdout,stderr){
-          //   console.log('copied Image')
-          //   if(err)console.error(err)
-          //   if(stderr)console.error(stderr)
-          // })//end exec
+          fs.rename(__dirname+'/../'+image.path,__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg',  function(err){
+              imagecount++;
+              if(err) console.error(err)
+              console.log('Image Saved.')
 
-      })//fs.rename
+              // exec("cp "+__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg '+__dirname+'/../public/calibration/'+camera_id+'.jpg',function(err,stdout,stderr){
+              //   console.log('copied Image')
+              //   if(err)console.error(err)
+              //   if(stderr)console.error(stderr)
+              // })//end exec
 
+          })//fs.rename
+        }else if(method=='armed'){
+          //console.log(method)
+          if(incomingCaptureCount.hasOwnProperty(camera.camera_id)){
+            incomingCaptureCount[camera.camera_id]++
+          }else{
+            incomingCaptureCount[camera.camera_id] = 0
+          }
 
+          var filename = camera_id+'_'+incomingCaptureCount[camera.camera_id]
+          console.log(filename)
+          fs.rename(__dirname+'/../'+image.path,__dirname+'/../'+currentDirectory+'/'+filename+'.jpg',  function(err){
+              imagecount++;
+              if(err) console.error(err)
+              console.log('Image Saved.')
 
+              // exec("cp "+__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg '+__dirname+'/../public/calibration/'+camera_id+'.jpg',function(err,stdout,stderr){
+              //   console.log('copied Image')
+              //   if(err)console.error(err)
+              //   if(stderr)console.error(stderr)
+              // })//end exec
+
+          })//fs.rename
+
+      }//end if method
+    }//end camera_id !=null
   }//return function
 }//saveImage
 
