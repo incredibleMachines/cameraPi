@@ -8,8 +8,8 @@ var async = require('async')
 var FFmpeg = require('fluent-ffmpeg')//ffmpeg inline commands in node
 var rimraf = require('rimraf')//recursive directory removal
 
-// var BROWSER_IP = 'http://192.168.0.2'
-var BROWSER_IP = 'localhost'
+var BROWSER_IP = '192.168.0.2'
+// var BROWSER_IP = 'localhost'
 
 var mode="quad"
 
@@ -25,14 +25,15 @@ var width = 4272/960
 var height = 2848/640
 
 var take='';
-var frameRate = 10
+var duration =.06
+var framerate = 30
 var numJpgs = 0;
 
-// var localPath =  "/Users/controlfreak/Desktop/cameraPi/processing_server/images"
-// var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
+var localPath =  "/Users/controlfreak/Desktop/cameraPi/processing_server/images"
+var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
 
-var localPath =  "/Users/IM_Laptop_01/Documents/cameraPi/processing_server/images"
-var remotePath =  "/Users/IM_Laptop_01/Documents/cameraPi/download_server/images"
+// var localPath =  "/Users/IM_Laptop_01/Documents/cameraPi/processing_server/images"
+// var remotePath =  "/Users/IM_Laptop_01/Documents/cameraPi/download_server/images"
 
 getCameras(function(_deviceList){
   deviceList = _deviceList
@@ -124,28 +125,32 @@ function processOutput(file,cb){
       console.log("GOT A JPG")
       numJpgs++;
 
-      var thisCam=file.slice(0,-4)
-      console.log('filename: '+thisCam)
-      var currentCamera=_.findWhere(deviceList,{camera_id:thisCam})
+
+      var s = file.indexOf('_')
+      var cam_id = file.substr(0,s)
+      console.log(cam_id)
+      var currentCamera=_.findWhere(deviceList,{camera_id:cam_id})
+
+      var filename= file.substr(0,file.indexOf('.'))
 
       if(typeof currentCamera!='undefined'){
 
-            var command = "convert "+localPath+"/"+take+"/originals/"+thisCam+".jpg -matte -virtual-pixel transparent \ -distort Perspective \ '"+currentCamera.warp[0]["x"]*width+","+currentCamera.warp[0]["y"]*height+" 0,0 "+currentCamera.warp[1]["x"]*width+","+currentCamera.warp[1]["y"]*height+" 640,0 "+currentCamera.warp[2]["x"]*width+","+currentCamera.warp[2]["y"]*height+" 640,640 "+currentCamera.warp[3]["x"]*width+","+currentCamera.warp[3]["y"]*height+" 0,640' \ "+localPath+"/"+take+"/warped/"+thisCam+".jpg"
+            var command = "convert "+localPath+"/"+take+"/originals/"+filename+".jpg -matte -virtual-pixel transparent \ -distort Perspective \ '"+currentCamera.warp[0]["x"]*width+","+currentCamera.warp[0]["y"]*height+" 0,0 "+currentCamera.warp[1]["x"]*width+","+currentCamera.warp[1]["y"]*height+" 640,0 "+currentCamera.warp[2]["x"]*width+","+currentCamera.warp[2]["y"]*height+" 640,640 "+currentCamera.warp[3]["x"]*width+","+currentCamera.warp[3]["y"]*height+" 0,640' \ "+localPath+"/"+take+"/warped/"+filename+".jpg"
 
             console.log("command: "+command)
             exec(command,function(error,stdout,stderr){
                 if(!error){
 
-                console.log("start crop " +thisCam)
-       gm(localPath+"/"+take+"/warped/"+thisCam+".jpg").crop(640,640,0,0).write(localPath+"/"+take+"/cropped/"+thisCam+".jpg", function(e){
+                console.log("start crop " +file)
+       gm(localPath+"/"+take+"/warped/"+filename+".jpg").crop(640,640,0,0).write(localPath+"/"+take+"/cropped/"+filename+".jpg", function(e){
                 if(!e){
-                  console.log("writing video " +thisCam)
-                  var inputPath=localPath+"/"+take+"/cropped/"+thisCam+".jpg"
-                  var outputPath=localPath+"/"+take+"/movs/"+thisCam+".mov"
+                  console.log("writing video " +file)
+                  var inputPath=localPath+"/"+take+"/cropped/"+filename+".jpg"
+                  var outputPath=localPath+"/"+take+"/movs/"+filename+".mov"
 
                   var command = new FFmpeg ({source: inputPath})
-                  .loop(.1)
-                  .withFps(30)
+                  .loop(duration)
+                  .withFps(framerate)
                   .toFormat('h264')
                     .on ('start',function(cmd){
                       console.log("Spawned ffmpeg with command: "+cmd)
