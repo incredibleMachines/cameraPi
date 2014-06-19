@@ -4,6 +4,17 @@ var less = require('less-middleware');
 var path = require('path');
 var http = require('http');
 var _ = require('underscore');
+var socketIO = require('socket.io')
+
+
+/**  TRIGGER UDP CONNECT ***/
+var dgram = require('dgram');
+
+var TRIGGER_IP = '192.168.0.199'
+var TRIGGER_PORT = '7998'
+
+
+var socket, io, server
 
 var MasterSettings = require(__dirname +'/modules/loadSettings.js');
 var Database = require(__dirname+'/modules/dbConnection.js');
@@ -35,6 +46,72 @@ app.use(express.session({secret: '!@#$%^&*()1234567890qwerty'}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
+
+
+
+server = http.createServer(app)
+io = socketIO.listen(server)
+
+//server.listen(9000)
+
+server.listen(app.get('port'), function(){
+	  console.log('Express server listening on port ' + app.get('port').toString());
+});
+
+
+io.sockets.on('connection', function(socket){
+  console.log('new socket connection')
+  //socket.emit('data',{hello:'world'})
+
+  socket.on('go',function(data){
+    console.log('got go message')
+    var udpclient = dgram.createSocket("udp4");
+    var goMessage = new Buffer('go')
+    udpclient.send(goMessage,0,goMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+      if(err) console.error(err)
+      udpclient.close()
+    })
+
+  })
+
+  socket.on('kick',function(data){
+    console.log('got kick message')
+    var udpclient = dgram.createSocket("udp4");
+    var kickMessage = new Buffer('kick')
+    udpclient.send(kickMessage,0,kickMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+      if(err) console.error(err)
+      udpclient.close()
+    })
+  })
+  socket.on('goal',function(data){
+    console.log('got goal message')
+    var udpclient = dgram.createSocket("udp4");
+    var goalMessage = new Buffer('goal')
+    udpclient.send(goalMessage,0,goalMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+      if(err) console.error(err)
+      udpclient.close()
+    })
+  })
+  socket.on('miss',function(data){
+    console.log('got miss message')
+    var udpclient = dgram.createSocket("udp4");
+    var kickMessage = new Buffer('miss')
+    udpclient.send(missMessage,0,missMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+      if(err) console.error(err)
+      udpclient.close()
+    })
+  })
+  socket.on('wiff',function(data){
+    console.log('got wiff message')
+    var udpclient = dgram.createSocket("udp4");
+    var wiffMessage = new Buffer('wiff')
+    udpclient.send(wiffMessage,0,wiffMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+      if(err) console.error(err)
+      udpclient.close()
+    })
+  })
+})
+
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -52,7 +129,7 @@ app.get('/arm', settings.armCameras(Database))
 app.post('/cameras/delete',settings.deleteCamera(Database))
 app.get('/getinfo',settings.getInfo(Database))
 app.get('/setupDB', settings.setupDB(MasterSettings.settings,Database))
-app.get('/controller',controls.renderPage())
+app.get('/controller',controls.renderPage(Database))
 app.get('/trigger',controls.triggerCameras())
 app.get('/cameras/ping',controls.pingCameras())
 app.get('/images',images.renderPage(Database))
@@ -61,13 +138,13 @@ app.get('/set-camera',images.setCamera())
 app.get('/gitpull',controls.gitPull(Database))
 app.get('/shutdown',controls.shutdown(Database))
 app.post('/cameras/init',settings.initCamera())
-app.post('/scanned',controls.scan())
+
 app.get('/send-armed',controls.sendArmed(Database))
 app.post('/cameras/images/center',images.saveCentered(Database))
 
-
 app.get('/cameras/all',cameras.index(Database))
 
-http.createServer(app).listen(app.get('port'), function(){
-	  console.log('Express server listening on port ' + app.get('port').toString());
-});
+app.get('/processed',controls.processed(Database,io))
+
+app.post('/scan',controls.scan(Database))
+app.post('/scanned',controls.scanned(Database,io))

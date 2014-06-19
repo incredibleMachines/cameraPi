@@ -31,7 +31,7 @@ function CameraController( cameras ){
               $('.'+camera._id).addClass('disconnected').removeClass('ready').removeClass('connected').removeClass('offline')
             }
         }else{
-          $('.'+camera._id).addClass('offline')
+          $('.'+camera._id).addClass('offline').removeClass('disconnected').removeClass('ready').removeClass('connected')
 
         }
       })

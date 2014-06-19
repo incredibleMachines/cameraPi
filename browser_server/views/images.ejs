@@ -31,11 +31,14 @@
 
 <form id="save-image" method="post" action="/save-image">
 	<input type="hidden" name="current" value=<%= currentCamera%>>
-	<input type="hidden" name="rotate" id="rotate" value="">
-	<input type="hidden" name="x" id="x" value="">
-	<input type="hidden" name="y" id="y" value="">
-	<input type="hidden" name="h" id="h" value="">
-	<input type="hidden" name="w" id="w" value="">
+	<input type="hidden" name="0X" id="0X" value="">
+	<input type="hidden" name="0Y" id="0Y" value="">
+	<input type="hidden" name="1X" id="1X" value="">
+	<input type="hidden" name="1Y" id="1Y" value="">
+	<input type="hidden" name="2X" id="2X" value="">
+	<input type="hidden" name="2Y" id="2Y" value="">
+	<input type="hidden" name="3X" id="3X" value="">
+	<input type="hidden" name="3Y" id="3Y" value="">
 	<input type="submit" value="Save Settings">
 </form>
 
@@ -60,10 +63,10 @@
 
 	}%>
 
-	var settings=<%- JSON.stringify(cameras) %>
+	var warp=<%- JSON.stringify(cameras) %>
 
 	console.log("ejs: " + currentCam)
-	loadPoints(settings,currentCam)
+	loadPoints(warp,currentCam)
 </script>
 
 

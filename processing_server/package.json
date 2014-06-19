@@ -11,6 +11,7 @@
     "gm":"*",
     "async":"*",
     "fluent-ffmpeg":"*",
-    "rimraf":"*"
+    "rimraf":"*",
+    "cors":"*"
    }
 }

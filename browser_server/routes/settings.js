@@ -338,11 +338,11 @@ exports.armCameras = function (MongoDB){
 
 exports.getInfo = function (MongoDB){
 	return function(req,res){
-		var cameras=MongoDB.getAll('cameras', function(_e, _data){
-			if(_e) console.error(_e)
-			_data=sortByKey(_data,'camera_id')
-			console.log(_data)
-			res.jsonp(_data)
+		MongoDB.queryCollectionWithOptions('cameras',{camera_id:{$ne:"NULL"}},{sort:{camera_id:1}},function(err,cameras){
+			if(err) console.error(err)
+			//_data=sortByKey(_data,'camera_id')
+			//console.log(_data)
+			res.jsonp(cameras)
 		})//end MongoDB.getAll('cameras')
 	}//return function
 }//getInfo()

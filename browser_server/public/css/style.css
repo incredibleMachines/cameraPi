@@ -49,7 +49,25 @@ ul.camera li h5 .input-group input{
 	display: inline;
 	margin: 0;
 	padding: 0;
+}
 
+/* ON FIELD CSS */
+
+/*.controller.IDLE{
+	background-color: #36b3e1;
+}
+.controller.QR_SCANNED{
+	background-color: #2bf3fd;
+}
+.controller.SYSTEM_CHECKED{
+	background-color: #26ec72;
+}
+.controller.SYSTEM_ARMED{
+	background-color: #fdb539;
+}
+.controller.SYSTEM_ACTIVE{
+	background-color: #ea2531;
+}*/
 
 /* CONTROLLER PAGE FRONT END FOR ADMINS*/
 

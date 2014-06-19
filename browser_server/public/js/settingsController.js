@@ -17,7 +17,7 @@ function SettingsController(cameras){
         })
       }else{
 
-        alert($('.camera').val())
+        //alert($('.camera').val())
 
         $.getJSON('http://'+$('.camera').val()+':8080/set?'+string).done(function(json){
           console.log('success')

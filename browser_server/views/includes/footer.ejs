@@ -11,7 +11,17 @@
 		<% }else if(title == 'Camera-Setting'){ %>
 			<script src="/js/settingsController.js"></script>
 			<script>
-				var settingsController = new SettingsController(<%- JSON.stringify(cameras) %>)
+				$(document).ready(function(){
+					var settingsController = new SettingsController(<%- JSON.stringify(cameras) %>)
+				})
+			</script>
+		<% }else if(title == 'Nike Controller'){ %>
+			<script src="/js/controlController.js"></script>
+			<script src="/socket.io/socket.io.js"></script>
+			<script>
+				$(document).ready(function(){
+					var controlController = new ControlController(<%- JSON.stringify(cameras) %>)
+				})
 			</script>
 		<% }else{ %>
 			<script src='/js/main.js'></script>

@@ -11,7 +11,7 @@ var BROWSER_IP = "localhost"
 var DOWNLOAD_IP = "localhost"
 
 var deviceList = {}
-var currentDirectory
+var currentDirectory = 'public/calibration'
 var currentCamera
 
 var imagecount = 0
@@ -26,6 +26,22 @@ var recording=false
 var take='st_12345'
 
 var incomingCaptureCount = {};
+
+var Info=''
+//populate data on launch pre init reinit on runs to ensure image capture
+http.get('http://'+BROWSER_IP+':3000/getinfo',function(_res){
+  _res.on('data',function(chunk){
+    Info+=chunk
+  })//res.on
+  _res.on('close',Complete)
+  _res.on('end',Complete)
+}).on('error',function(err){
+  console.error(err)
+})//http.get
+
+function Complete(){
+  deviceList=Info
+}
 
 
 exports.startProcessing=function(){
@@ -47,48 +63,48 @@ exports.initDownload= function(){
       })//res.on
       _res.on('close',onComplete)
       _res.on('end',onComplete)
+    }).on('error',function(err){
+      console.error(err)
     })//http.get
 
     function onComplete(){
-      console.log(info)
-      console.log("dl: "+deviceList.length)
+      deviceList=info
+    //console.log(info)
+    console.log("dl: "+deviceList.length)
+    deviceList=JSON.parse(info)
+    console.log(req.param('take'))
 
+    if(req.query.hasOwnProperty('method')){
+      //MUST UNCOMMENT THIS
+      //method = "calibration"
+      method = req.param('method')
+    }
 
-      console.log(req.param('action'))
-      deviceList=JSON.parse(info)
+      if(method==="armed"){
+        if(req.query.hasOwnProperty('take')){
+          //MUST UNCOMMENT THIS
+          take=req.param('take')//new Date().getTime()
+        }
 
-        if(method==="armed"){
-          take=new Date().getTime()
-          res.jsonp({"inited":"true","take":take})
+        fs.mkdir('images/'+take,function(){
+          //MUST UNCOMMENT THIS
+          currentDirectory='images/'+take
 
-          fs.mkdir('images/'+take,function(){
-            currentDirectory='images/'+take
+          incomingCaptureCount = {};
 
-            incomingCaptureCount = {};
+          imagecount=0
+          console.log("current: "+currentDirectory)
 
-            imagecount=0
-            console.log("current: "+currentDirectory)
+          // console.log(req.param('participantCode'))
+          // console.log(req.param('firstName'))
+          // console.log(req.param('lastName'))
+          res.jsonp({inited:true,method: method, take:take})
+        })//fs.mkdir
+    }else if(method==="calibration"){//endif (method=='armed')
+      currentDirectory='public/calibration'
+      res.jsonp({inited:true,method:method})
+    }
 
-            console.log(req.param('participantCode'))
-            console.log(req.param('firstName'))
-            console.log(req.param('lastName'))
-
-            http.get('http://'+BROWSER_IP+':3000/send-armed?takeawayID='+take+'&participantCode='+req.param('participantCode'),function(__res){
-              console.log("sent arm data")
-              //res.jsonp({"sent":"success"})
-            }).on('error',function(e){
-              console.error(e)
-            })//http.get
-          })//fs.mkdir
-      }else if(method==="calibration"){//endif (method=='armed')
-        currentDirectory='public/calibration'
-        http.get('http://'+BROWSER_IP+':3000/send-armed',function(__res){
-          console.log("sent calibration arm data")
-          // res.jsonp({"sent":"success"})
-        }).on('error',function(e){
-          console.error(e)
-        })//http.get
-      }
     }// onComplete
 
   }//return function
@@ -168,6 +184,7 @@ exports.setMethod=function(){
   return function(req,res){
     method=req.param('method')
     console.log("method: "+method)
+    if(method == 'calibration') currentDirectory='public/calibration'
     res.jsonp({"method":method})
   }
 }

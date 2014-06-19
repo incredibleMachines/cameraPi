@@ -12,6 +12,7 @@
      "underscore":"*",
      "less-middleware": "0.1.x",
      "ejs": "*",
-     "gm":"*"
+     "gm":"*",
+     "socket.io":"*"
   }
 }

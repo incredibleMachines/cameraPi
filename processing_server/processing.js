@@ -3,6 +3,8 @@ var http = require('http')
 var path = require('path')
 var fs = require('fs')
 var http = require('http')
+var cors = require('cors')
+
 
 
 var processing=require( __dirname +'/routes/processing');
@@ -10,7 +12,7 @@ var processing=require( __dirname +'/routes/processing');
 var app = express()
 
 
-
+app.use(cors())
 app.set('port', process.env.PORT || 3002)
 app.set('title', 'Image Downloader')
 app.set('views', __dirname + '/views')
