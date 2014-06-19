@@ -83,6 +83,7 @@ io.sockets.on('connection', function(socket){
       udpclient.close()
     })
   })
+
   socket.on('goal',function(data){
     console.log('got goal message')
     var udpclient = dgram.createSocket("udp4");
@@ -92,15 +93,17 @@ io.sockets.on('connection', function(socket){
       udpclient.close()
     })
   })
+
   socket.on('miss',function(data){
     console.log('got miss message')
     var udpclient = dgram.createSocket("udp4");
-    var kickMessage = new Buffer('miss')
+    var missMessage = new Buffer('miss')
     udpclient.send(missMessage,0,missMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
       if(err) console.error(err)
       udpclient.close()
     })
   })
+
   socket.on('wiff',function(data){
     console.log('got wiff message')
     var udpclient = dgram.createSocket("udp4");
@@ -108,6 +111,17 @@ io.sockets.on('connection', function(socket){
     udpclient.send(wiffMessage,0,wiffMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
       if(err) console.error(err)
       udpclient.close()
+    })
+  })
+
+  socket.on('reset',function(data){
+    console.log('got reset message')
+    var udpclient = dgram.createSocket("udp4");
+    var resetMessage = new Buffer('reset')
+    udpclient.send(resetMessage,0,resetMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+      if(err) console.error(err)
+      udpclient.close()
+			controls.reset(Database)
     })
   })
 })

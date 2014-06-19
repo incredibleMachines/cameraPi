@@ -5,7 +5,7 @@ function ControlController(cameras){
       DOWNLOAD_IP = '192.168.0.2:3001',
       PROCESSING_IP = '192.168.0.5',
 
-      TRIGGER_IP ='192.168.0.3' //stu 192.168.0.199
+      TRIGGER_IP ='192.168.0.199' //stu 192.168.0.199
 
   var IO_PORTS = ':3000'
 
@@ -151,6 +151,15 @@ function ControlController(cameras){
     $('.lastName').html(' ')
     $('.code').html(' ')
 
+  })
+
+  $('.reset').click(function(){
+    sendMessage('reset')
+    $(".SYSTEM_ACTIVE").hide()
+    $(".IDLE").show()
+    $('.firstName').html(' ')
+    $('.lastName').html(' ')
+    $('.code').html(' ')
   })
 
   function sendMessage(msg){

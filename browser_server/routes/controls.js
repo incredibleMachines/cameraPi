@@ -11,9 +11,11 @@ var TRIGGER_PORT = '7998'
 // var DOWNLOAD_IP='192.168.0.2'
 var DOWNLOAD_IP='localhost'
 
-var BOLSTER_IP= "10.18.0.201"//"192.168.2.199"
+var BOLSTER_IP= "192.168.2.199"//"10.18.0.201"
 
 var BOLSTER_PORT = '10001'
+
+var currentTake = ''
 
 exports.renderPage = function (MongoDB){
 	return function(req,res){
@@ -64,7 +66,7 @@ exports.scan = function(MongoDB){
 				}else{
 					console.log('Created Take ID: '+_take._id)
 
-
+					currentTake=_take
 					var data = {
 												app: 'SKILL_TRACK',
 												action: 'ARM',
@@ -163,6 +165,7 @@ exports.scanned = function(MongoDB,io){
 							var udpclient = dgram.createSocket("udp4");
 							var message = new Buffer("take "+_take._id+" "+_take.participantCode)
 							udpclient.send(message,0,message.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+								console.log("trigger message sent")
 								udpclient.close()
 							})
 
@@ -209,6 +212,32 @@ exports.processed = function(MongoDB){
 			}
 		})
 	}
+}
+
+exports.reset = function(){
+	//return function(req,res){
+		console.log("Reset Message")
+
+				/* BETA BETA BETA */
+				var data = {
+											app: 'SKILL_TRACK',
+											action: 'FINISH',
+											takeawayId: currentTake._id,
+											participantCode: currentTake.participantCode,
+											filename: currentTake._id+'/output.mov'
+
+				}
+				socket = net.Socket()
+				socket.connect(BOLSTER_PORT,BOLSTER_IP)
+				socket.on("connect",function(){
+					console.log('socket connected')
+					socket.write(JSON.stringify(data),'utf8',function(){
+						console.log("success")
+					})
+				}).on("error",function(err){
+					console.log(err)
+				})
+	//}
 }
 
 exports.sendArmed = function(MongoDB){
