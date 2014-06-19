@@ -1,0 +1,69 @@
+<% include includes/header %>
+<section class="controller" style="margin: 0 auto; width: 100%; height: 100%;">
+    <article class="IDLE" style ="width: 50%; margin: 0 auto; padding: 10px; text-align: center;">
+        <h4>Waiting QR Scan</h4>
+    </article>
+    <article class="QR_SCANNED" style ="width: 50%; margin: 0 auto; padding: 10px; text-align: center; display:none;">
+        <h4 class="firstName">FirstName</h4>
+        <h4 class="lastName">LastName</h4>
+        <h6 class="code">HiuhGY</h6>
+        <button class="btn btn-primary btn-lg check">Check System</button>
+    </article>
+
+    <article class="SYSTEM_CHECKED" style ="width: 50%; margin: 0 auto; padding: 10px; text-align: center;display:none;">
+        <h4 class="firstName">FirstName</h4>
+        <h4 class="lastName">LastName</h4>
+        <h6 class="code">HiuhGY</h6>
+        <button class="btn btn-primary btn-lg arm">Arm System</button>
+    </article>
+
+    <article class="SYSTEM_ARMED" style ="width: 50%; margin: 0 auto; padding: 10px; text-align: center;display:none;">
+        <h4 class="firstName">FirstName</h4>
+        <h4 class="lastName">LastName</h4>
+        <h6 class="code">HiuhGY</h6>
+        <button class="btn btn-primary btn-lg go">Go</button>
+    </article>
+
+    <article class="SYSTEM_ACTIVE" style ="width: 50%; margin: 0 auto; padding: 10px; text-align: center;display:none;">
+      <button style="padding: 0 auto; width: 40%;" class="btn btn-primary btn-lg kick">Kick</button>
+      <article style="width:100%; padding: 10px; text-align:center;">
+        <button style="display:inline;" class="btn btn-primary btn-lg miss">Miss</button>
+        <button style="display:inline;" class="btn btn-primary btn-lg goal">Goal</button>
+        <button style="display:inline;" class="btn btn-primary btn-lg wiff">Wiff</button>
+      </article>
+    </article>
+
+
+    <!--
+    <article style="width: 50%; margin: 0 auto; padding: 10px; text-align: center;">
+      <button style="padding: 0 auto; width: 40%;" class="btn btn-default qr">Scan QR</button>
+    </article>
+    <article style="width: 50%; margin: 0 auto; padding: 10px; text-align: center;">
+      <button style="padding: 0 auto; width: 40%;" class="btn btn-default check">Check System</button>
+    </article>
+    <article style="width: 50%; margin: 0 auto; padding: 10px; text-align: center; display: none;">
+      <button style="padding: 0 auto; width: 40%;" class="btn btn-default arm">Arm</button>
+    </article>
+    <article style="width: 50%; margin: 0 auto; padding: 10px; text-align: center; display: none;">
+      <button style="padding: 0 auto; width: 40%;" class="btn btn-default go">Go</button>
+    </article>
+    <article style="width: 50%; margin: 0 auto; padding: 10px; text-align: center;">
+      <button style="padding: 0 auto; width: 40%;" class="btn btn-default kick">Kick</button>
+    </article>
+    <article style="width: 50%; margin: 0 auto;">
+      <article style="width:100%; padding: 10px; text-align:center;">
+        <button style="display:inline;" class="btn btn-default miss">Miss</button>
+        <button style="display:inline;" class="btn btn-default goal">Goal</button>
+        <button style="display:inline;" class="btn btn-default wiff">Wiff</button>
+      </article>
+    </article>
+    -->
+
+
+      <article class="SYSTEM_RESET" style ="width: 50%; margin: 0 auto; padding: 10px; text-align: center; position:absolute; bottom: 40px">
+        <button style="padding: 0 auto; width: 40%;" class="btn btn-primary btn-lg reset">RESET</button>
+      </article>
+
+</section>
+
+<% include includes/footer %>

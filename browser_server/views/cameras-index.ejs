@@ -1,0 +1,72 @@
+<% include includes/header %>
+
+<section id="cameras-index">
+  <ul id="cameras" class="list-group">
+    <% cameras.forEach(function(camera){ %>
+        <li class="camera list-group-item <%= camera._id %>" data-mongoid="<%= camera._id %>">
+          <ul class="camera id-<%=camera.camera_id %>">
+            <li class="col-md-2">
+              <h4>
+                <section class="input-group">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default">id: </button>
+                  </span>
+                  <input class="form-control" name="camera_id" value="<%=camera.camera_id%>"></input>
+                  <span class="input-group-btn">
+                  <button name="camera_id" class="btn btn-default">Update(WIP)</button>
+                  </span>
+                </section>
+              </h4>
+            </li>
+            <li class="col-md-2" style="padding: 0 30px 0 0;"><h4><%=camera.address%><h4></li>
+            <li class="col-md-3">
+              <div><h5>Laser Local: <span> TBD </span></h5> <button name="laser_local" class="laser_local btn btn-default">Toggle</button>
+              </div>
+              <div><h5>Laser: <span><%= camera.laser %></span></h5>  <button name="laser" class="laser btn btn-default">Toggle</button>
+              </div>
+            </li>
+            <% if(camera.delay !== 'undefined'){ %><li class="col-md-2">Delay: <%= camera.delay %></li><% } %>
+            <li class="col-md-1">
+              <button name="status" class="status btn btn-default">get status</button>
+              <button name="reconnect" class="reconnect btn btn-default">reconnect</button>
+            </li>
+            <li class="col-md-1">
+              <button name="reboot" class="reboot btn btn-default">reboot</button>
+              <button name="shutdown" class="shutdown btn btn-default">shutdown</button></li>
+            <li class="col-md-1">
+              <button name="gitpull" class="gitpull btn btn-default">gitpull</button></li>
+            </li>
+          </ul><!--.camera -->
+          <div class="camera-settings">
+
+          </div>
+        </li><!--.camera -->
+    <% }) %>
+  </ul><!-- #cameras -->
+</section>
+<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+    <ul class="nav navbar-nav" style="margin: 0 40px;">
+      <li>
+        <button type="button" class="btn btn-default navbar-btn get-status-all">Get System Status</button>
+      </li>
+      <li>
+        <button type="button" class="btn btn-default navbar-btn reconnect-all">Reconnect All</button>
+      </li>
+      <li>
+        <button type="button" class="btn btn-default navbar-btn git-pull-all">Git Pull All</button>
+      </li>
+      <li>
+        <button type="button" class="btn btn-default navbar-btn ready-all">Ready All</button>
+      </li>
+      <li>
+        <button type="button" class="btn btn-default navbar-btn trigger-all">Trigger</button>
+      </li>
+      <li>
+          <button type="button" class="btn btn-default navbar-btn broadcast">Broadcast</button>
+      </li>
+      <li>
+          <button type="button" class="btn btn-default navbar-btn process">Process</button>
+      </li>
+    </ul>
+</nav>
+<% include includes/footer %>

@@ -2,6 +2,7 @@ var express = require('express')
 var http = require('http')
 var path = require('path')
 var fs = require('fs')
+var cors = require('cors')
 
 
 var download=require( __dirname +'/routes/download')
@@ -14,6 +15,7 @@ app.set('title', 'Image Downloader')
 app.set('views', __dirname + '/views')
 app.set('view engine', 'ejs')
 app.set("jsonp callback", true)
+app.use(cors())
 app.use(express.favicon())
 app.use(express.logger('dev'))
 app.use(express.bodyParser({limit:'1000mb', uploadDir: 'tmp', keepExtensions: true})) //temporary folder to store images on upload
@@ -31,7 +33,6 @@ if ('development' == app.get('env')) {
 app.listen(8081)
 
 var imageCounter = 0
-
 
 app.get('/set-method',download.setMethod())
 app.post('/',download.saveImage())

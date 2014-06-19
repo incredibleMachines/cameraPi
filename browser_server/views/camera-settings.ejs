@@ -1,51 +1,155 @@
-<% /* SCENES SINGLE PAGE */ %>
 <% include includes/header %>
-
-
-
-<form id="camera-select" method="get" action="/cameras/select">
-<select name="camera_id">
-<option value="all"<% if(currentCamera=="all"){%>
-<%= "selected" %>
-
-<%}%> >
-all</option>
-<% for (var i=0;i<cameras.length;i++){%>
-	<option value=<%= cameras[i].camera_id %> <%
-	if(cameras[i].camera_id==currentCamera){
-
-	console.log("id: "+cameras[i].camera_id)
-	console.log(currentCamera )%>
-
-	<%= "selected" %>
-
-	<%}%> >
-	<%= cameras[i].camera_id %>
-<%}%>
+<select class="camera">
+  <option value="all">All Cameras</option>
+  <% cameras.forEach(function(camera){ %>
+      <option value="<%= camera.address %>"><%= camera.camera_id  %></option>
+  <% }) %>
 </select>
-<input type="submit" value="Change Camera">
-</form>
+<form method="get" class="imageformat">
+  <select name="imageformat">
+    <option value="0">Large Fine JPEG</option>
+    <option value="1">Large Normal JPEG</option>
+    <option value="2">Medium Fine JPEG</option>
+    <option value="3">Medium Normal JPEG</option>
+    <option value="4">Small Fine JPEG  (S1 Fine)</option>
+    <option value="5">Small Normal JPEG (S1 Normal)</option>
+    <option value="6">Smaller JPEG (S2)</option>
+    <option value="7">Tiny JPEG (S3)</option>
+    <option value="8">RAW + Large Fine JPEG</option>
+    <option value="9">RAW</option>
+  </select>
+  <button type="submit">submit</button>
 
-
-<% for (var i=0;i<settings.length;i++){%>
-	<form id= "camera-settings" method="post" action="/set">
-		<strong><%= settings[i].name%></strong>
-			<% if(settings[i].options){%>
-				<select name=<%=settings[i].call%>>
-<% for (var j=0;j<settings[i].options.length;j++){%>
-  <option value=<%=j%>
-  	<%if (j==settings[i].value) {%>
-  <%="selected"%>
-  <%}%>>
-  <%=settings[i].options[j].name%></option>
-<%}}%>
-</select>
-<% if(i<5||i>8){%>
-<input type="submit" value="Update">
-<%}
-else{%>
-<strong><%= settings[i].value%></strong>
-<% }%>
 </form>
-<%}%>
+<form method="get" class="iso">
+  <select name="iso">
+    <option value="0">Auto</option>
+    <option value="1">100</option>
+    <option value="2">200</option>
+    <option value="3">400</option>
+    <option value="4">800</option>
+    <option value="5">1600</option>
+    <option value="6">3200</option>
+    <option value="7">6400</option>
+  </select>
+  <button type="submit">submit</button>
+
+</form>
+<form method="get" class="whitebalance">
+  <select name="whitebalance">
+    <option value="0"> Auto </option>
+    <option value="1"> Daylight </option>
+    <option value="2"> Shadow </option>
+    <option value="3"> Cloudy </option>
+    <option value="4"> Tungsten </option>
+    <option value="5"> Fluorescent </option>
+    <option value="6"> Flash </option>
+    <option value="7"> Manual </option>
+  </select>
+  <button type="submit">submit</button>
+
+</form>
+<form method="get" class="autoexposuremode">
+  <select name="autoexposuremode">
+    <option value="0" >P</option>
+    <option value="1" >TV</option>
+    <option value="2" >AV</option>
+    <option value="3" >Manual</option>
+    <option value="4" >Bulb</option>
+    <option value="5" >A_DEP</option>
+    <option value="6" >DEP</option>
+    <option value="7" >Custom</option>
+    <option value="8" >Lock</option>
+    <option value="9" >Green</option>
+    <option value="10" >Night Portrait</option>
+    <option value="11" >Sports</option>
+    <option value="12" >Portrait</option>
+    <option value="13" >Landscape</option>
+    <option value="14" >Closeup</option>
+    <option value="15" >Flash Off</option>
+  </select>
+  <button type="submit">submit</button>
+
+</form>
+<form method="get" class="aperture">
+    <select name="aperture">
+      <option value="0">3.5</option>
+      <option value="1">4</option>
+      <option value="2">4.5</option>
+      <option value="3">5</option>
+      <option value="4">5.6</option>
+      <option value="5">6.3</option>
+      <option value="6">7.1</option>
+      <option value="7">8</option>
+      <option value="8">9</option>
+      <option value="9">10</option>
+      <option value="10">11</option>
+      <option value="11">13</option>
+      <option value="12">14</option>
+      <option value="13">16</option>
+      <option value="14">18</option>
+      <option value="15">20</option>
+      <option value="16">22</option>
+    </select>
+    <button type="submit">submit</button>
+
+</form>
+<form method="get" class="shutterspeed">
+  <select name="shutterspeed">
+    <option value="0">bulb</option>
+    <option value="1">30</option>
+    <option value="2">25</option>
+    <option value="3">20</option>
+    <option value="4">15</option>
+    <option value="5">13</option>
+    <option value="6">10</option>
+    <option value="7">8</option>
+    <option value="8">6</option>
+    <option value="9">5</option>
+    <option value="10">4</option>
+    <option value="11">3.2</option>
+    <option value="12">2.5</option>
+    <option value="13">2</option>
+    <option value="14">1.6</option>
+    <option value="15">1.3</option>
+    <option value="16">1</option>
+    <option value="17">0.8</option>
+    <option value="18">0.6</option>
+    <option value="19">0.5</option>
+    <option value="20">0.4</option>
+    <option value="21">0.3</option>
+    <option value="22">1/4</option>
+    <option value="23">1/5</option>
+    <option value="24">1/6</option>
+    <option value="25">1/8</option>
+    <option value="26">1/10</option>
+    <option value="27">1/13</option>
+    <option value="28">1/15</option>
+    <option value="29">1/20</option>
+    <option value="30">1/25</option>
+    <option value="31">1/30</option>
+    <option value="32">1/40</option>
+    <option value="33">1/50</option>
+    <option value="34">1/60</option>
+    <option value="35">1/80</option>
+    <option value="36">1/100</option>
+    <option value="37">1/125</option>
+    <option value="38">1/160</option>
+    <option value="39">1/200</option>
+    <option value="40">1/250</option>
+    <option value="41">1/320</option>
+    <option value="42">1/400</option>
+    <option value="43">1/500</option>
+    <option value="44">1/640</option>
+    <option value="45">1/800</option>
+    <option value="46">1/1000</option>
+    <option value="47">1/1250</option>
+    <option value="48">1/1600</option>
+    <option value="49">1/2000</option>
+    <option value="50">1/2500</option>
+    <option value="51">1/3200</option>
+    <option value="52">1/4000</option>
+  </select>
+  <button type="submit">submit</button>
+</form>
 <% include includes/footer %>

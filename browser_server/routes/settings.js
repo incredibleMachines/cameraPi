@@ -98,10 +98,10 @@ exports.load =  function(MongoDB){
 								MongoDB.getAll('cameras', function(___e, ___data){
 								if(!___e){
 										console.log(___data)
-										___data=sortByKey(_data,'camera_id')
+										___data=sortByKey(___data,'camera_id')
 										res.render('camera-settings', {
 											settings: current,
-											cameras:___data,
+											cameras: ___data,
 											currentCamera:currentCamera,
 											title: "Camera-Setting",
 											header: "Camera Settings!"
@@ -128,7 +128,16 @@ exports.load =  function(MongoDB){
 }//return function
 }//function load()
 
+exports.getStatus = function(MongoDB){
+	return function(req,res){
+
+
+
+	}//end req,res
+}
+
 exports.initCamera = function(_settings,MongoDB){
+	//to do process camera init response
 	return function(req,res){
 		var post=req.body
 		console.log(req.body)
@@ -302,6 +311,7 @@ function updateCameraOnSave(_MongoDB,_doc,post,cb){
 	})//end MongoDB.update('cameras')
 }
 
+
 exports.armCameras = function (MongoDB){
 	return function(req,res){
 		var trigger={}
@@ -328,11 +338,11 @@ exports.armCameras = function (MongoDB){
 
 exports.getInfo = function (MongoDB){
 	return function(req,res){
-		var cameras=MongoDB.getAll('cameras', function(_e, _data){
-			if(_e) console.error(_e)
-			_data=sortByKey(_data,'camera_id')
-			console.log(_data)
-			res.jsonp(_data)
+		MongoDB.queryCollectionWithOptions('cameras',{camera_id:{$ne:"NULL"}},{sort:{camera_id:1}},function(err,cameras){
+			if(err) console.error(err)
+			//_data=sortByKey(_data,'camera_id')
+			//console.log(_data)
+			res.jsonp(cameras)
 		})//end MongoDB.getAll('cameras')
 	}//return function
 }//getInfo()
@@ -415,7 +425,6 @@ exports.saveSetting=function(MongoDB){
 		// 	if(_e) console.error(_e)
 		// 	else console.log("settings save to camera master")
 		// })
-
 
 		}//endif (selectAll==true)
 	}//return function

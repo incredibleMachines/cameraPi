@@ -22,6 +22,7 @@ exports.MongoConnect = function(){
 		collection.cameras = database.collection('cameras');
 		collection.settings = database.collection('settings');
 		collection.options = database.collection('options');
+		collection.takes = database.collection('takes')
 	})
 }
 
