@@ -139,7 +139,7 @@ exports.scanned = function(MongoDB,io){
 							console.log('---------------------------')
 
 							//init download app
-							http.get('http://'+DOWNLOAD_IP+':3001/init?take='+_take._id+'&method=armed',function(res){
+							http.get('http://'+DOWNLOAD_IP+':3001/init?take='+_take._id+'&method=armed&participant='+_take.participantCode,function(res){
 
 								res.on('data',function(data){
 									console.log('Received From Download: ')
@@ -179,8 +179,8 @@ exports.scanned = function(MongoDB,io){
 						res.jsonp(500,{error:'not found'})
 					}
 
-				}
-			})
+			}
+		})
 	}
 }
 
@@ -188,16 +188,16 @@ exports.processed = function(MongoDB){
 	return function(req,res){
 		console.log("Processed Message!")
 		console.log(req.param('take'))
+		console.log(req.param('participant'))
 		MongoDB.getDocumentByID('takes',req.param('take'),function(err,_take){
 			if(_take){
 				/* BETA BETA BETA */
 				var data = {
-											app: 'SKILL_TRACK',
-											action: 'FINISH',
-											takeawayId: _take._id,
-											participantCode: _take.participantCode,
-											filename: _take._id+'/output.mov'
-
+						app: 'SKILL_TRACK',
+						action: 'FINISH',
+						takeawayId: _take._id,
+						participantCode: _take.participantCode,
+						filename: _take._id+'/output.mov'
 				}
 				socket = net.Socket()
 				socket.connect(BOLSTER_PORT,BOLSTER_IP)

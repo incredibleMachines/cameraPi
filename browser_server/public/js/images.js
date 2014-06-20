@@ -3,10 +3,10 @@ var editPoints, prevPoints, nextPoints
 var currentSettings, prevSettings, nextSettings
 
 var currentCamera='001'
-var totalCam=111
+var totalCam=116
 
-var outWidth=320
-var outHeight=320
+var outWidth=640
+var outHeight=640
 
 var current, prev, next, prevCamera, nextCamera
 
@@ -15,6 +15,8 @@ var bNext=false
 
 // var DOWNLOAD_IP='192.168.0.2'
 var DOWNLOAD_IP='localhost'
+
+var rotate
 
 var loadPoints = function(vars,cur){
 
@@ -31,23 +33,20 @@ var loadPoints = function(vars,cur){
 	else if(prev<100) prevCamera="0"+String(prev)
 	else prevCamera=String(prev)
 
-
 	console.log("NEXT: "+nextCamera)
 	console.log("CURRENT:"+parseInt(currentCamera))
 
-	currentSettings=vars[current-1].calibration
+	currentSettings=vars[current-1]
 
 	// editPoints=vars[current-1].warp
-	if(current!=0){
-		prevSettings=vars[prev-1].calibration
+	if(current!=1){
+		prevSettings=vars[prev-1]
 		// prevPoints=vars[prev-1].warp
 	}
-	if(current!=totalCam-1){
+	if(current<totalCam-1){
 		// nextPoints=vars[next-1].warp
-		nextSettings=vars[prev-1].calibration
+		nextSettings=vars[next-1]
 	}
-
-	console.log(editPoints)
 
 }
 
@@ -91,25 +90,25 @@ $(document).ready(function(){
 		img.onload = function(){
 
 			drawImage()
-			initTransform(c, prevC, nextC, editPoints, prevPoints, nextPoints)
+			drawOutput()
 
-		}
+		}//img.onload
 
 		img.crossOrigin = ''
 		img.src = "http://"+DOWNLOAD_IP+":3001/post/"+currentCamera+".jpg"
 
-		if(current!=0){
+		if(current!=1){
 				prevImg.onload = function(){
 					prevCtx.clearRect(0,0,c.width, c.height)
 					prevCtx.globalAlpha=.5
 					prevCtx.rotate(prevSettings[rotate])
 					prevCtx.drawImage(prevImg,prevSettings['x'],prevSettings['y'],prevSettings['w'],prevSettings['h'])
-				}
+				}//onload
 				prevImg.crossOrigin = ''
-				prevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
-			}
+				prevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
+			}//current!=0
 
-		if(current!=totalCam){
+		if(current<totalCam-1){
 			nextImg.onload = function(){
 				nextCtx.clearRect(0,0,c.width, c.height)
 				nextCtx.globalAlpha=.5
@@ -117,25 +116,28 @@ $(document).ready(function(){
 				nextCtx.drawImage(nextImg,nextSettings['x'],nextSettings['y'],nextSettings['w'],nextSettings['h'])
 			}
 			nextImg.crossOrigin=''
-			nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
-		}
+			nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
+		}//curent!=totalCam
 
 		$('#onion-skin').click(function(){
 			if($('#before').is(':checked')) bPrev=true
 			else bPrev=false
 			if($('#after').is(':checked')) bNext=true
 			else bNext=false
-			initTransform(c, prevC, nextC, editPoints, prevPoints, nextPoints)
-		})
+			drawOutput()
+
+		})//.click
 
 		$(document).keydown(function(event){
 
-
+			var rotateModifier=Math.PI/180
 			if(event.shiftKey==true){
 				moveModifier=5
+				rotateModifier*=5
 			}
-			else if(event.ctrlKeyx==true){
+			else if(event.ctrlKey==true){
 				moveModifier=0.1
+				rotateModifier*=.1
 			}
 			else{
 				moveModifier=1
@@ -144,191 +146,133 @@ $(document).ready(function(){
 			if(event.which==38){
 				event.preventDefault()
 				// if(method=="psr"){
-					for(var i=0; i<editPoints.length;i++){
-						adjustPosition(0,-moveModifier,i)
-					}
-				// }
-				// else
-				// {
-				// 	adjustPosition(0,-moveModifier,selected)
-				// }
+
+						adjustPosition(0,-moveModifier)
+
+
+
 			}
 			else if(event.which==39){
 				event.preventDefault()
 				// if(method=="psr"){
-					for(var i=0; i<editPoints.length;i++){
-						adjustPosition(moveModifier,0,i)
-					}
-				// }
-				// else
-				// {
-				// 	adjustPosition(moveModifier,0,selected)
-				// }
+						adjustPosition(moveModifier,0)
+
+
+
 			}
 			else if(event.which==40){
 				event.preventDefault()
 				// if(method=="psr"){
-					for(var i=0; i<editPoints.length;i++){
-						adjustPosition(0,moveModifier,i)
-					}
-				// }
-				// else
-				// {
-				// 	adjustPosition(0,moveModifier,selected)
-				// }
+						adjustPosition(0,moveModifier)
+
+
+
 			}
 			else if(event.which==37){
 				event.preventDefault()
-				// if(method=="psr"){
-					for(var i=0; i<editPoints.length;i++){
-						adjustPosition(-moveModifier,0,i)
-					}
-				// }
-				// else
-				// {
-				// 	adjustPosition(-moveModifier,0,selected)
-				// }
+				adjustPosition(-moveModifier,0)
+
 			}
 			else if(event.which==90){
 				adjustZoom(moveModifier)
+
 			}
 			else if(event.which==65){
 				adjustZoom(-moveModifier)
+
 			}
 
 			else if(event.which==188){
-				adjustRotate(-moveModifier/10)
+				adjustRotate(rotateModifier)
+
 			}
 			else if(event.which==190){
-				adjustRotate(moveModifier/10)
+				adjustRotate(-rotateModifier)
+
 			}
 
-			drawImage()
+		})//keydown
 
-			$('rotate').attr("value",currentSettings['rotate'])
-			$('x').attr("value",currentSettings['x'])
-			$('y').attr("value",currentSettings['y'])
-			$('h').attr("value",currentSettings['h'])
-			$('w').attr("value",currentSettings['w'])
+function update(){
 
-		})
+}
 
-function initTransform(c,prevC, nextC, editPoints,prevPoints,nextPoints){
+function drawOutput(){
 
-	var trans = transformCanvas(c,currentSettings,true)
-	var prevTrans, nextTrans
-
-	if(bPrev==true){
-		prevTrans=transformCanvas(prevC,prevSettings,false)
-	}
-
-	if(bNext==true){
-		nextTrans=transformCanvas(nextC,nextSettings,false)
-	}
 
 	var destC = document.getElementById('image-output');
 	var destCtx = destC.getContext('2d');
 
+	drawImage()
+
 	destC.width = destC.width; // clear the canvas
 
-	destCtx.drawImage(trans, outWidth, outHeight);
+	destCtx.drawImage(c, currentSettings['x'], currentSettings['y'],currentSettings['w'],currentSettings['h'],0,0,640,640)
 
 	if(bPrev==true){
-		destCtx.drawImage(prevTrans,outWidth,outHeight)
+		destCtx.drawImage(prevC, prevSettings['x'], prevSettings['y'],prevSettings['w'],prevSettings['h'],0,0,640,640)
 	}
 
 	if(bNext==true){
-		destCtx.drawImage(nextTrans,outWidth,outHeight)
+		destCtx.drawImage(nextC, nextSettings['x'], nextSettings['y'],nextSettings['w'],nextSettings['h'],0,0,640,640)
 	}
 
 	destCtx.beginPath()
-	destCtx.moveTo(480,320)
-	destCtx.lineTo(480,1280)
+	destCtx.moveTo(320,0)
+	destCtx.lineTo(320,640)
 	destCtx.closePath()
 	destCtx.strokeStyle = '#ff0000'
 	destCtx.lineWidth=.5
 	destCtx.stroke()
 
 	destCtx.beginPath()
-	destCtx.moveTo(320,480)
-	destCtx.lineTo(640,480)
+	destCtx.moveTo(0,320)
+	destCtx.lineTo(640,320)
 	destCtx.closePath()
 	destCtx.strokeStyle = '#ff0000'
 	destCtx.lineWidth=.5
 	destCtx.stroke()
+
+	$('#x').val(currentSettings['x'])
+	$('#y').val(currentSettings['y'])
+	$('#w').val(currentSettings['w'])
+	$('#h').val(currentSettings['h'])
+	$('#rotate').val(currentSettings['rotate'])
 
 }
 
 	function drawImage(){
 			ctx.clearRect(0,0,c.width, c.height)
+			// ctx.rotate(currentSettings['rotate'])
+			console.log(currentSettings['rotate'])
+
+			ctx.save()
+			ctx.translate(c.width/2,c.height/2)
 			ctx.rotate(currentSettings['rotate'])
-			ctx.drawImage(img,imgPoints[0]["x"],imgPoints[0]["y"],imgPoints[2]["x"],imgPoints[2]["y"])
+			ctx.translate(-c.width/2,-c.height/2)
+			ctx.drawImage(img,0,0,c.width,c.height)
+			ctx.restore()
 
-			ctx.beginPath()
-			ctx.moveTo(currentSettings['x'],currentSettings['y'])
-			ctx.lineTo(currentSettings['x']+currentSettings['w'],currentSettings['y'])
-			ctx.lineTo(currentSettings['x']+currentSettings['w'],currentSettings['y']+currentSettings['h'])
-			ctx.lineTo(currentSettings['x'],urrentSettings['y']+currentSettings['h'])
-			ctx.lineTo(currentSettings['x'],currentSettings['y'])
-			ctx.closePath()
-			ctx.strokeStyle = '#ff0000'
-			ctx.lineWidth=2
-			ctx.stroke()
 
-			ctx.beginPath()
-			ctx.arc(currentSettings['x'],currentSettings['y'], 3, 0, 2 * Math.PI, false)
-			ctx.closePath()
 
-			ctx.fillStyle = '#ffff00'
-			if(selected==0){
-				ctx.fillStyle='#00ff00'
-			}
-			ctx.fill()
-
-			ctx.beginPath()
-			ctx.arc(currentSettings['x']+currentSettings['w'],currentSettings['y'], 3, 0, 2 * Math.PI, false)
-			ctx.closePath()
-			ctx.fillStyle = '#ffff00'
-			if(selected==1){
-				ctx.fillStyle='#00ff00'
-			}
-			ctx.fill()
-
-			ctx.beginPath()
-			ctx.arc(currentSettings['x']+currentSettings['w'],currentSettings['y']+currentSettings['h'], 3, 0, 2 * Math.PI, false)
-			ctx.closePath()
-			ctx.fillStyle = '#ffff00'
-			if(selected==2){
-				ctx.fillStyle='#00ff00'
-			}
-			ctx.fill()
-
-			ctx.beginPath()
-			ctx.arc(currentSettings['x'],urrentSettings['y']+currentSettings['h'], 3, 0, 2 * Math.PI, false)
-			ctx.closePath()
-			ctx.fillStyle = '#ffff00'
-			if(selected==3){
-				ctx.fillStyle='#00ff00'
-			}
-			ctx.fill()
 	}
 
-	function adjustPosition (x, y, which){
+	function adjustPosition (x, y){
 		currentSettings["x"]=parseFloat(currentSettings["x"])+x
 		currentSettings["y"]=parseFloat(currentSettings["y"])+y
-		initTransform(c, prevC, nextC, currentSettings, prevSettings, nextSettings)
+		drawOutput()
 	}
 
 	function adjustZoom (amt){
-		currentSettings["x"]=parseFloat(currentSettings["x"])+x/2
-		currentSettings["y"]=parseFloat(currentSettings["y"])+y/2
-		currentSettings["w"]=parseFloat(currentSettings["w"])+x/2
-		currentSettings["h"]=parseFloat(currentSettings["h"])+y/2
-		initTransform(c, prevC, nextC, currentSettings, prevSettings, nextSettings)
+		currentSettings["x"]=parseFloat(currentSettings["x"])-amt/2
+		currentSettings["y"]=parseFloat(currentSettings["y"])-amt/2
+		currentSettings["w"]=parseFloat(currentSettings["w"])+amt
+		currentSettings["h"]=parseFloat(currentSettings["h"])+amt
+		drawOutput()
 	}
 
 	function adjustRotate (angle){
-		currentSettings["rotate"]=parseFloat(currentSettings["rotate"])+angle
-		initTransform(c, prevC, nextC, editPoints, prevPoints, nextPoints)
-		initTransform(c, prevC, nextC, currentSettings, prevSettings, nextSettings)
+		currentSettings["rotate"]+=angle
+		drawOutput()
 	}
+})
