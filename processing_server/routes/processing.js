@@ -28,10 +28,11 @@ var totalCams = 23
 var width = 4272/960
 var height = 2848/640
 
-var take='';
+//var take='';
 var duration =.1
 var framerate = 30
 var numJpgs = 0;
+
 
 var localPath =  "/Users/controlfreak/Desktop/cameraPi/processing_server/images"
 var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
@@ -46,8 +47,9 @@ getCameras(function(_deviceList){
 
 exports.process = function(){
   return function(req,res){
-    take='';
-    take=req.param('take')
+    var take=req.param('take')
+    var participant = req.param('participant')
+
     console.log("begin processing on folder: "+localPath+"/"+take)
     rimraf(localPath+"/"+take, function(e){
       if(e) console.error(e)
@@ -75,9 +77,9 @@ exports.process = function(){
                     //console.log("Processing: "+)
                     var counter = 0
                     console.log(files.length)
-                    Take.run(take,files,deviceList,function(err,take){
+                    Take.run(take,participant,files,deviceList,function(err,take){
                       console.log("Finished Take: "+take)
-                      sendFinishToBrowser(take)
+                      sendFinishToBrowser(take,participant)
                     })
                       // queue.push(files,function(_err){
                       //     counter++
@@ -127,7 +129,7 @@ function getCameras(cb){
 
 }
 
-function sendFinishToBrowser(take){
+function sendFinishToBrowser(take,participant){
   					/* COMPLETE */
 					/*
 					{
@@ -139,7 +141,7 @@ function sendFinishToBrowser(take){
 
 					}
 					*/
-          http.get('http://'+BROWSER_IP+':3000/processed?take='+take,function(res){
+          http.get('http://'+BROWSER_IP+':3000/processed?take='+take+'&participant='+participant,function(res){
               res.on('data',function(chunk){
                 console.log(chunk.toString())
               })
