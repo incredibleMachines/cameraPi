@@ -80,6 +80,7 @@ exports.process = function(){
                     Take.run(take,participant,files,deviceList,function(err,take){
                       console.log("Finished Take: "+take)
                       sendFinishToBrowser(take,participant)
+
                     })
                       // queue.push(files,function(_err){
                       //     counter++

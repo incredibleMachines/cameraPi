@@ -12,19 +12,18 @@ var width = 4272/960
 var height = 2848/640
 
 var take='';
-var duration =.1
 var framerate = 30
 var numJpgs = 0;
 
 var localPath =  "/Users/controlfreak/Desktop/cameraPi/processing_server/images"
 var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
-var graphicsPath= "/Users/controlfreak/Desktop/cameraPi/processing_server/images/mograph"
+
 
 exports.run = function(take,participant,files,deviceList,callback){
   console.log('starting process of new take')
   console.log(take)
-  var concurrency = 4
-  var counter = 0;
+  var concurrency = 50
+  var counter = 0
 
   var queue = async.queue(processOutput,concurrency)
 
@@ -39,30 +38,30 @@ exports.run = function(take,participant,files,deviceList,callback){
 
   queue.drain = function(){
     console.log("Queue Complete")
-    fs.readdir(localPath+'/'+take+'/movs',function(error,files){
+    fs.readdir(localPath+'/'+take+'/cropped',function(error,files){
       if(error) {
         console.log("readdir error")
         console.error(error)
       }
       else{
         files.forEach(function(file,i){
-        console.log("RENAME: "+file)
-        var count=0
-          if(file.indexOf('.mov')>-1){
-            fs.rename(localPath+'/'+take+'/movs/'+file,localPath+'/'+take+'/renamed/'+i+'.mov',function(e){
-              if(e) {
-                console.log('rename error')
-                console.error(e)
-              }
-              else{
-                console.log("renaming file")
-                count++
-              }
-            })//fs.rename
-          }//endif .mov
-          else{
-            count++
-          }
+          console.log("RENAME: "+file)
+          var count=0
+            if(file.indexOf('.jpg')>-1){
+              fs.rename(localPath+'/'+take+'/cropped/'+file,localPath+'/'+take+'/renamed/'+i+'.jpg',function(e){
+                if(e) {
+                  console.log('rename error')
+                  console.error(e)
+                }
+                else{
+                  console.log("renaming file")
+                  count++
+                }
+              })//fs.rename
+            }//endif .jpg
+            else{
+              count++
+            }
 
           if(i==files.length-1){
             console.log("making txt file")
@@ -70,7 +69,7 @@ exports.run = function(take,participant,files,deviceList,callback){
             var outputFinalPath=localPath+"/"+take+"/output/"+take+".mov"
             // var outputFinalPath="/output/"+take+".mov"
             for(var i=0;i<files.length;i++){
-              filestring+='file \''+localPath+'/'+take+'/renamed/'+i+'.mov\'\n'
+              filestring+='file \''+localPath+'/'+take+'/renamed/'+i+'.jpg\'\n'
             }
             fs.writeFile(localPath+'/'+take+'/renamed/mylist.txt', filestring, function(err) {
               if(err) {
@@ -78,10 +77,10 @@ exports.run = function(take,participant,files,deviceList,callback){
                 console.error(err);
               }else {
                 console.log("The file was saved!");
-                var concat = "/usr/local/bin/ffmpeg -f concat -i "+localPath+'/'+take+'/renamed/mylist.txt -c copy '+outputFinalPath
+                var concat = "/usr/local/bin/ffmpeg -f concat -i "+localPath+'/'+take+'/renamed/mylist.txt -r 30 -c copy '+outputFinalPath
                 exec(concat,function(error,stdout,stderr){
                   if(!error){
-                    console.log("Final Video Rendered! ENJOY!")
+                    console.log("Final Video Rendered!")
                     //console.log("bye")
                     console.log("Moving File to folder.")
                     var copyFile = "cp "+outputFinalPath+" /output/"+participant+'_'+take+'.mov'
@@ -121,31 +120,7 @@ exports.run = function(take,participant,files,deviceList,callback){
 gm(localPath+"/"+take+"/originals/"+filename+".jpg").rotate('#fff',currentCamera.rotate).crop(currentCamera.w*width,currentCamera.h*height,currentCamera.x*width,currentCamera.y*height).resize(640,null).write(localPath+"/"+take+"/cropped/"+filename+".jpg", function(e){
           if(!e){
             console.log("writing video " +file)
-
-            var inputPath=localPath+"/"+take+"/cropped/"+filename+".jpg"
-            var outputPath=localPath+"/"+take+"/movs/"+filename+".mov"
-
-            var command = new FFmpeg ({source: inputPath})
-            .loop(duration)
-            .withFps(framerate)
-            .toFormat('h264')
-            .on ('start',function(cmd){
-              console.log("Spawned ffmpeg with command: "+cmd)
-            })
-            .on('codecData', function(data){
-              console.log('Input is ' + data.audio + ' audio with ' + data.video + ' video')
-            })
-            .on('progress',function(progress){
-              console.log('Processing: ' + progress.percent + '% done')
-            })
-            .on('error',function(error){
-              console.log('Cannot process video: ' + error.message)
-            })
-            .on('end', function() {
-              console.log('Processing finished successfully')
-              cb()
-            })
-            .saveToFile(outputPath)
+            cb()
           }else{//if(!e)
             console.log("gm error!")
             console.log(e)
@@ -154,11 +129,12 @@ gm(localPath+"/"+take+"/originals/"+filename+".jpg").rotate('#fff',currentCamera
           }//endif(!e)
         })//end exec gmwrite
       }else{
-        console.log("NOT A JPG");
+        console.log("file is undefined");
         cb()
       }
     }
     else{
+      console.log("NOT A JPG")
       cb()
     }
   }
