@@ -162,3 +162,14 @@ app.get('/processed',controls.processed(Database,io))
 
 app.post('/scan',controls.scan(Database))
 app.post('/scanned',controls.scanned(Database,io))
+
+app.get('/go',function(req,res){
+	res.jsonp({sent:'go'})
+	var udpclient = dgram.createSocket("udp4");
+	var goMessage = new Buffer('go')
+	udpclient.send(goMessage,0,goMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+		if(err) console.error(err)
+		udpclient.close()
+	})
+
+})

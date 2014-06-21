@@ -24,6 +24,7 @@ var method="calibration" //or "armed"
 var live=0
 var recording=false
 var take='st_12345'
+var participant = ''
 
 var incomingCaptureCount = {};
 
@@ -85,6 +86,9 @@ exports.initDownload= function(){
           //MUST UNCOMMENT THIS
           take=req.param('take')//new Date().getTime()
         }
+        if(req.query.hasOwnProperty('participant')){
+          participant = req.param('participant')
+        }
 
         fs.mkdir('images/'+take,function(){
           //MUST UNCOMMENT THIS
@@ -98,7 +102,7 @@ exports.initDownload= function(){
           // console.log(req.param('participantCode'))
           // console.log(req.param('firstName'))
           // console.log(req.param('lastName'))
-          res.jsonp({inited:true,method: method, take:take})
+          res.jsonp({inited:true,method: method, take:take, participant: participant})
         })//fs.mkdir
     }else if(method==="calibration"){//endif (method=='armed')
       currentDirectory='public/calibration'

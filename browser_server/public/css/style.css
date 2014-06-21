@@ -96,9 +96,6 @@ ul.camera li h5 .input-group input{
 /*IMAGES PAGE FRONT END FOR EDITOR */
 
 #image-output{
-	position:absolute;
-	height:1280px;
-	top:-614px;
-	width:1280px;
-	left:340px;
+	height:640px;
+	width:640px;
 }

@@ -8,13 +8,14 @@ function CameraController( cameras ){
 
     var CURRENT_TAKE = '',
         DOWNLOAD_IP = '192.168.0.2:3001',
-        PROCESS_IP = '192.168.0.5:3002'
+        PROCESS_IP = '192.168.0.5:3002',
+        CURRENT_USER = ''
 
 
 
     $('button.process').click(function(event){
       if(CURRENT_TAKE !== ''){
-        $.getJSON('http://'+PROCESS_IP+'/?take='+CURRENT_TAKE)
+        $.getJSON('http://'+PROCESS_IP+'/?take='+CURRENT_TAKE+'&participant='+CURRENT_USER)
       }else{
         alert('You Must Arm The System First')
       }
@@ -96,6 +97,7 @@ function CameraController( cameras ){
         console.log('')
 
         CURRENT_TAKE = json.take
+        CURRENT_USER = json.participant
 
       }).fail(function(jqxhr,status,error){
         var err = status+' '+error

@@ -29,8 +29,8 @@ exports.renderPage = function (MongoDB){
 
 exports.saveCentered = function(MongoDB){
 	return function(req,res){
-		var json=[{"x":160,"y":0},{"x":800,"y":0},{"x":800,"y":640},{"x":160,"y":640}]
-		MongoDB.update('cameras',{camera_id:currentCamera},{$set:{warp:json}},function(_e,_data){
+
+		MongoDB.update('cameras',{camera_id:currentCamera},{$set:{x:160,y:0,w:640,h:640,rotate:0}},function(_e,_data){
 				if(!_e){
 					console.log("crop for camera "+currentCamera+" saved!")
 					res.redirect("/images")
@@ -52,9 +52,8 @@ exports.saveImage = function(MongoDB){
 	return function (req,res){
 		var post = req.body
 		console.log(post["current"]);
-		currentCamera=post["current"]
-		var json=[{"x":post["0X"],"y":post["0Y"]},{"x":post["1X"],"y":post["1Y"]},{"x":post["2X"],"y":post["2Y"]},{"x":post["3X"],"y":post["3Y"]}]
-		MongoDB.update('cameras',{camera_id:currentCamera},{$set:{warp:json}},function(_e,_data){
+	currentCamera=post["current"]
+	MongoDB.update('cameras',{camera_id:currentCamera},{$set:{x:post["x"],y:post["y"],w:post["w"],h:post["h"],rotate:post["rotate"]}},function(_e,_data){
 				if(!_e){
 					console.log("crop for camera "+currentCamera+" saved!")
 					res.redirect("/images")

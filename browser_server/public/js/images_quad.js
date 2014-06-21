@@ -312,7 +312,6 @@ destCtx.stroke()
 
 function transformCanvas(c,editPoints,bCurrent) {
 
-
 	var p1 = {x:parseFloat(editPoints[0]["x"]),y:parseFloat(editPoints[0]["y"])} // upper left corner
 	var p2 = {x:parseFloat(editPoints[3]["x"]),y:parseFloat(editPoints[3]["y"])} // lower left corner
 	var p3 = {x:parseFloat(editPoints[2]["x"]),y:parseFloat(editPoints[2]["y"])} // lower right corner
