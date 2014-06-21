@@ -55,23 +55,67 @@ ul.camera li h5 .input-group input{
 }
 
 /* ON FIELD CSS */
+.controller{
 
-/*.controller.IDLE{
-	background-color: #36b3e1;
+	padding: 100px 0 0 0;
+}
+
+.controller img{
+	max-width: 320px
+	width: auto;
+	max-height: 320px;
+	height: auto;
+	margin: 0 auto 100px;
+}
+.controller.IDLE{
+	background-color: #ed1c24;
 }
 .controller.QR_SCANNED{
-	background-color: #2bf3fd;
+	background-color: #ffed0b;
 }
 .controller.SYSTEM_CHECKED{
-	background-color: #26ec72;
+	background-color: #ffed0b;
 }
 .controller.SYSTEM_ARMED{
-	background-color: #fdb539;
+	background-color: #000;
 }
 .controller.SYSTEM_ACTIVE{
-	background-color: #ea2531;
-}*/
+	background-color: #fff;
+}
 
+.controller h1,h2,h3,h4,h5,h6,p {
+	font-family: RhodeRebelMediumCondensed;
+	text-transform: uppercase;
+	color:#000;
+}
+
+
+.controller h1{
+	font-size: 80px;
+
+}
+
+.controller h1.arm{
+	color: #ed1c24;
+	font-size: 120px;
+}
+.controller h1.go{
+	color: #ed1c24;
+	font-size: 300px;
+}
+
+.controller h1.kick{
+	color: #ed1c24;
+	font-size: 120px;
+}
+
+.controller h5{
+	font-size: 40px;
+}
+
+.controller article.option h1{
+	font-size: 60px
+}
 /* CONTROLLER PAGE FRONT END FOR ADMINS*/
 
 #arm-cameras input[type="submit"]{

@@ -5,6 +5,7 @@ var path = require('path');
 var http = require('http');
 var _ = require('underscore');
 var socketIO = require('socket.io')
+var cors = require('cors')
 
 
 /**  TRIGGER UDP CONNECT ***/
@@ -12,6 +13,8 @@ var dgram = require('dgram');
 
 var TRIGGER_IP = '192.168.0.199'
 var TRIGGER_PORT = '7998'
+
+var PROCESSING_IP = '192.168.0.5'
 
 
 var socket, io, server
@@ -27,10 +30,12 @@ var settings=require( __dirname +'/routes/settings');
 var controls=require( __dirname +'/routes/controls');
 var images=require( __dirname +'/routes/images');
 var cameras = require( __dirname+'/routes/cameras')
+var takes = require(__dirname+'/routes/takes')
+var processing=require( __dirname +'/routes/processing');
 
 
 app.locals._ = _
-
+app.use(cors())
 app.set('port', process.env.PORT || 3000);
 app.set('title', 'Camera Controller');
 app.set('views', __dirname + '/views');
@@ -104,6 +109,7 @@ io.sockets.on('connection', function(socket){
     })
   })
 
+
   socket.on('wiff',function(data){
     console.log('got wiff message')
     var udpclient = dgram.createSocket("udp4");
@@ -124,6 +130,45 @@ io.sockets.on('connection', function(socket){
 			controls.reset(Database)
     })
   })
+	socket.on('finish',function(data){
+		console.log('got finish message')
+		console.log(data)
+		//controls.reset(Database)
+
+		var udpclient = dgram.createSocket("udp4");
+		var resetMessage = new Buffer('reset')
+		udpclient.send(resetMessage,0,resetMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+			if(err) console.error(err)
+			udpclient.close()
+			controls.reset(Database)
+		})
+
+		//set timeout
+		var timeout = 350000
+		//waiting for image downloads to come through
+
+		Database.updateByID('takes', data._id, {$set: {status: 'queued'}},function(err){
+			console.log('timeout: '+timeout)
+			// setTimeout(function(_data){
+			// 	//data = { take: '53a43580d5d8201115a50ed2', participant: 'OAX4G' }
+			//
+			// 	console.log('-------------------------')
+			// 	console.log('Making Process Request.')
+			// 	console.log('-------------------------')
+			//
+			// 	http.get('http://'+PROCESSING_IP+':3002?take='+data.take+'&participant='+data.participant,function(res){
+			// 		Database.updateByID('takes',_data._id,{$set:{status:'submitted'}},function(_err){
+			// 			console.log('Updated Take '+_data._id + 'to submitted')
+			// 		})
+			// 		console.log('Response')
+			//
+			// 	}).on('error',function(err){
+			// 		console.log('post')
+			// 	})
+
+			//}(data),timeout)
+		})
+	})
 })
 
 app.all('*', function(req, res, next) {
@@ -162,6 +207,11 @@ app.get('/processed',controls.processed(Database,io))
 
 app.post('/scan',controls.scan(Database))
 app.post('/scanned',controls.scanned(Database,io))
+
+app.get('/takes',takes.index(Database))
+app.get('/take/:id',takes.findSingle(Database))
+
+app.get('/process',processing.process(Database))
 
 app.get('/go',function(req,res){
 	res.jsonp({sent:'go'})

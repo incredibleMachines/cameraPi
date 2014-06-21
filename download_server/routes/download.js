@@ -92,7 +92,8 @@ exports.initDownload= function(){
 
         fs.mkdir('images/'+take,function(){
           //MUST UNCOMMENT THIS
-          currentDirectory='images/'+take
+          //TAKING OUT CURRENT DIRECTORY
+          //currentDirectory='images/'+take
 
           incomingCaptureCount = {};
 
@@ -106,6 +107,15 @@ exports.initDownload= function(){
         })//fs.mkdir
     }else if(method==="calibration"){//endif (method=='armed')
       currentDirectory='public/calibration'
+      deviceList.forEach(function(device){
+        http.get('http://'+device.address+':8080/disarm',function(_res){
+          _res.on('data',function(chunk){
+            console.log(device.address+' '+chunk)
+          })//res.on
+        }).on('error',function(err){
+          console.error(err)
+        })//http.get
+      })
       res.jsonp({inited:true,method:method})
     }
 
@@ -184,11 +194,91 @@ exports.saveImage = function(){
   }//return function
 }//saveImage
 
+exports.saveImageTake = function(){
+  return function (req,res) {
+
+
+      console.log(method)
+
+      res.jsonp({post:"armed"})
+      //console.log(req)
+      var post = req.body;
+      //console.log(post)
+      var files = req.files;
+      //console.log(files)
+      var image = files.image
+      // console.log(image)
+      var file = image.originalFilename.substr(0,image.originalFilename.indexOf('.'))
+      //need to create unique image paths here
+      console.log(req.connection.remoteAddress)
+
+      var take_id = req.params.take_id;
+
+      var camera = _.findWhere(deviceList,{address:req.connection.remoteAddress})
+      console.log('Camera: '+camera['camera_id'])
+      camera_id=camera['camera_id']
+
+
+      var directory = 'images/'+take_id
+      console.log(currentDirectory)
+      if(camera_id !== "NULL"){
+        if(method == 'calibration'){
+          var filename = camera_id+'_'+incomingCaptureCount[camera.camera_id]
+
+          fs.rename(__dirname+'/../'+image.path,__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg',  function(err){
+              imagecount++;
+              if(err) console.error(err)
+              console.log('Calibration Image Saved.')
+
+              // exec("cp "+__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg '+__dirname+'/../public/calibration/'+camera_id+'.jpg',function(err,stdout,stderr){
+              //   console.log('copied Image')
+              //   if(err)console.error(err)
+              //   if(stderr)console.error(stderr)
+              // })//end exec
+
+          })//fs.rename
+        }else if(method=='armed'){
+          //console.log(method)
+          if(incomingCaptureCount.hasOwnProperty(camera.camera_id)){
+            incomingCaptureCount[camera.camera_id]++
+          }else{
+            incomingCaptureCount[camera.camera_id] = 0
+          }
+
+          var filename = camera_id+'_'+incomingCaptureCount[camera.camera_id]
+          console.log(filename)
+          fs.rename(__dirname+'/../'+image.path,__dirname+'/../'+directory+'/'+filename+'.jpg',  function(err){
+              imagecount++;
+              if(err) console.error(err)
+              console.log('Take Image Saved.')
+
+              // exec("cp "+__dirname+'/../'+currentDirectory+'/'+camera_id+'.jpg '+__dirname+'/../public/calibration/'+camera_id+'.jpg',function(err,stdout,stderr){
+              //   console.log('copied Image')
+              //   if(err)console.error(err)
+              //   if(stderr)console.error(stderr)
+              // })//end exec
+
+          })//fs.rename
+
+      }//end if method
+    }//end camera_id !=null
+  }//return function
+}//saveImage
+
 exports.setMethod=function(){
   return function(req,res){
     method=req.param('method')
     console.log("method: "+method)
     if(method == 'calibration') currentDirectory='public/calibration'
+    deviceList.forEach(function(device){
+      http.get('http://'+device.address+':8080/disarm',function(_res){
+        _res.on('data',function(chunk){
+          console.log(device.address+' '+chunk)
+        })//res.on
+      }).on('error',function(err){
+        console.error(err)
+      })//http.get
+    })
     res.jsonp({"method":method})
   }
 }

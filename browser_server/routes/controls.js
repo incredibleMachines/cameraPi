@@ -15,6 +15,10 @@ var BOLSTER_IP= "192.168.2.199"//"10.18.0.201"
 
 var BOLSTER_PORT = '10001'
 
+
+var LIVECAPTURE_IP = "192.168.0.6"
+var LIVECAPTURE_PORT = "12121"
+
 var currentTake = ''
 
 exports.renderPage = function (MongoDB){
@@ -56,6 +60,7 @@ exports.scan = function(MongoDB){
 								participantCode: post.participantCode,
 								firstName: post.firstName,
 								lastName: post.lastName,
+								status: 'created',
 								timestamp: new Date()
 		}
 
@@ -168,7 +173,11 @@ exports.scanned = function(MongoDB,io){
 								console.log("trigger message sent")
 								udpclient.close()
 							})
-
+							var udpclient2 = dgram.createSocket("udp4")
+							udpclient2.send(message,0,message.length,LIVECAPTURE_PORT, LIVECAPTURE_IP,function(err,bytes){
+								console.log('Live Capture message sent')
+								udpclient2.close()
+							})
 
 							if(!server_error) res.jsonp({success:'signaling to track'})
 							else res.jsonp(500,{error:'could not connect to DownloadApp'})
@@ -190,26 +199,25 @@ exports.processed = function(MongoDB){
 		console.log(req.param('take'))
 		console.log(req.param('participant'))
 		MongoDB.getDocumentByID('takes',req.param('take'),function(err,_take){
-			if(_take){
-				/* BETA BETA BETA */
-				var data = {
-						app: 'SKILL_TRACK',
-						action: 'FINISH',
-						takeawayId: _take._id,
-						participantCode: _take.participantCode,
-						filename: _take._id+'/output.mov'
-				}
-				socket = net.Socket()
-				socket.connect(BOLSTER_PORT,BOLSTER_IP)
-				socket.on("connect",function(){
-					console.log('socket connected')
-					socket.write(JSON.stringify(data),'utf8',function(){
-						res.jsonp({send:"success"})
-					})
-				}).on("error",function(err){
-					res.jsonp(500,{error:err})
-				})
-			}
+			// var options = {
+			//   hostname: '192.168.0.200',
+			//   port: 3000,
+			//   path: '/',
+			//   method: 'POST'
+			// };
+			// var req = http.request(options,function(res){
+			// 	res.setEncoding('utf8')
+			// 	res.on('data', function (chunk) {
+			//     console.log('BODY: ' + chunk);
+			//   });
+			// })
+			//
+			// _take.bulletTime = "controlfreak/Desktop/cameraPi/processing_server/images/"+_take._id+"/output/"+_take.participantCode+"_"+_take._id+".mov"
+			// _take.liveCapture = "controlfreak/Desktop/of/addons/ofxBlackMagic/liveVideoRecorder/bin/data/capture/"+_take.participantCode+"_"+_take._id+".mov"
+			//
+			// req.write(_take)
+			// req.end()
+
 		})
 	}
 }

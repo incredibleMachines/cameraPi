@@ -35,6 +35,7 @@ app.listen(8081)
 var imageCounter = 0
 
 app.get('/set-method',download.setMethod())
+app.post('/:take_id',download.saveImageTake())
 app.post('/',download.saveImage())
 app.get('/init',download.initDownload())
 app.get('/process',download.startProcessing())
