@@ -47,8 +47,8 @@ ae_queue.drain = function(){
 }
 
 var localPath =  __dirname+"/../images"
-var remotePath = '~/Desktop/chris'
-//var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
+//var remotePath = '~/Desktop/chris'
+var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
 
 // var localPath =  "/Users/IM_Laptop_01/Documents/cameraPi/processing_server/images"
 // var remotePath =  "/Users/IM_Laptop_01/Documents/cameraPi/download_server/images"
@@ -79,34 +79,36 @@ exports.process = function(){
               if(_e) console.error(__e)
               else{
                 var curl = "/usr/local/bin/curl -u controlfreak:cfs -O sftp://192.168.0.6/Users/controlfreak/Desktop/of_v0.8.1_osx_release/addons/ofxBlackmagic/nikeVideoRecorder/bin/data/"
+                console.log('curl exec')
                 exec("cd "+localPath+'/'+folder+" && "+curl+take+'.mov',function(error,stdout,stderr){
-                  if(error )console.error(error)
+                  if(error ) console.error(error)
                   else{
-                  var body = ''
-                  http.get('http://'+BROWSER_IP+':3000/take/'+take,function(res){
-                    res.on('data',function(chunk){
-                      body+=chunk
+                    console.log(stdout)
+                    var body = ''
+                    http.get('http://'+BROWSER_IP+':3000/take/'+take,function(res){
+                      res.on('data',function(chunk){
+                        body+=chunk
+                      })
+                      res.on('end',complete)
+                      res.on('complete',complete)
+                    }).on('error',function(getErr){
+                      console.error('get Take JSON')
+                      console.error(getErr)
+                      //send back data to Browser to Update DB
                     })
-                    res.on('end',complete)
-                    res.on('complete',complete)
-                  }).on('error',function(getErr){
-                    console.error('get Take JSON')
-                    console.error(getErr)
-                    //send back data to Browser to Update DB
-                  })
-                  function complete(){
-                    //send back data to browser to update db
-                    console.log('GOT JSON')
-                    console.log(body)
+                    function complete(){
+                      //send back data to browser to update db
+                      console.log('GOT JSON')
+                      console.log(body)
 
-                    var data = JSON.parse(body)
+                      var data = JSON.parse(body)
 
-                    var person = {firstName:data.firstName, lastName:data.lastName}
-                    var call = 'run('+JSON.stringify(person)+', "'+__dirname+'/../images/'+folder+'/'+take+'.mov" , "'+__dirname+'/../images/'+folder+'/'+folder+'.mov","'+folder+'")'
-                    var script = 'NikePhenomFastTrack.jsx'
+                      var person = {firstName:data.firstName, lastName:data.lastName}
+                      var call = 'run('+JSON.stringify(person)+', "'+__dirname+'/../images/'+folder+'/'+take+'.mov" , "'+__dirname+'/../images/'+folder+'/'+folder+'.mov","'+folder+'")'
+                      var script = 'NikePhenomFastTrack.jsx'
 
-                    var obj = {call:call,script:script}
-                    ae_queue.push(obj)
+                      var obj = {call:call,script:script}
+                      ae_queue.push(obj)
 
                     }
                   }//end if error curl
