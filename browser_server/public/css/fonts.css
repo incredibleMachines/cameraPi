@@ -1,0 +1,41 @@
+/**
+ * @license
+ * MyFonts Webfont Build ID 2828754, 2014-06-14T11:56:04-0400
+ * 
+ * The fonts listed in this notice are subject to the End User License
+ * Agreement(s) entered into by the website owner. All other parties are 
+ * explicitly restricted from using the Licensed Webfonts(s).
+ * 
+ * You may obtain a valid license at the URLs below.
+ * 
+ * Webfont: ITC Lubalin Graph Std Demi by ITC
+ * URL: http://www.myfonts.com/fonts/itc/lubalin-graph/std-demi/
+ * 
+ * Webfont: ITC Lubalin Graph Std Book by ITC
+ * URL: http://www.myfonts.com/fonts/itc/lubalin-graph/std-book/
+ * 
+ * 
+ * License: http://www.myfonts.com/viewlicense?type=web&buildid=2828754
+ * Licensed pageviews: 250,000
+ * Webfonts copyright: Copyright &#x00A9; 1985, 1987, 1997, 1998, 2001 Adobe Systems Incorporated.  All Rights Reserved.
+ * 
+ * © 2014 MyFonts Inc
+*/
+
+  
+@font-face {font-family: 'LubalinGraphStd-Demi';src: url('../fonts/2B29D2_0_0.eot');src: url('../fonts/2B29D2_0_0.eot?#iefix') format('embedded-opentype'),url('../fonts/2B29D2_0_0.woff') format('woff'),url('../fonts/2B29D2_0_0.ttf') format('truetype');}
+ 
+  
+@font-face {font-family: 'LubalinGraphStd-Book';src: url('../fonts/2B29D2_1_0.eot');src: url('../fonts/2B29D2_1_0.eot?#iefix') format('embedded-opentype'),url('../fonts/2B29D2_1_0.woff') format('woff'),url('../fonts/2B29D2_1_0.ttf') format('truetype');}
+
+@font-face {
+    font-family: 'RhodeRebelMediumCondensed';
+    src: url('../fonts/rhoderebelfinal-webfont.eot');
+    src: url('../fonts/rhoderebelfinal-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/rhoderebelfinal-webfont.woff') format('woff'),
+         url('../fonts/rhoderebelfinal-webfont.ttf') format('truetype'),
+         url('../fonts/rhoderebelfinal-webfont.svg#rhoderebel_mediumcondenseMdCn') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}

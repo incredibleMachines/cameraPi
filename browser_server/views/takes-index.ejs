@@ -1,0 +1,27 @@
+<% include includes/header %>
+<ul>
+<% takes.forEach(function(take){ %>
+
+  <li class="<%= take._id %>" style=" list-style:none;">
+      <ul style="display:inline; list-style:none;">
+        <li style="display:inline; list-style:none; margin: 10px 20px">
+          id:<%= take._id %>
+        </li>
+        <li style="display:inline; list-style:none; margin: 10px 20px">
+          Code: <%= take.participantCode %>
+        </li>
+        <li style="display:inline; list-style:none; margin: 10px 20px">
+         First: <%= take.firstName %></li>
+        <li style="display:inline; list-style:none; margin: 10px 20px">
+         Last: <%= take.lastName %>
+        </li>
+        <li style="display:inline; list-style:none; margin: 10px 20px">
+          Status: <%= take.status %></li>
+        <li style="display:inline; list-style:none; margin: 10px 20px"> Timestamp: <%= take.timestamp %> </li>
+          <li style="display:inline; list-style:none; margin: 10px 20px"><a href="/process?take=<%=take._id %>&participant=<%=take.participantCode%>">Process Link</a></li>
+      </ul>
+  </li>
+
+<% }) %>
+</ul>
+<% include includes/footer %>

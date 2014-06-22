@@ -24,6 +24,14 @@
 <input type="submit" value="Change Camera">
 </form>
 
+<form id="trigger" method="get" action=<% for (var i=0;i<cameras.length;i++){%>
+	<% if(cameras[i].camera_id==currentCamera){%>
+		<%= "http://"+cameras[i].address+":8080/trigger" %>
+	<%}%>
+<%}%>>
+<input type="submit" value="Refresh Camera">
+</form>
+
 <form id="onion-skin">
 	<strong>Set Onion:</strong>
 	<input type="checkbox" id="before" value="before">-1 Frame</input>

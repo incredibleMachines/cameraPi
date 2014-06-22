@@ -1,11 +1,11 @@
 var editPoints, prevPoints, nextPoints
 
-var currentSettings, prevSettings, prev2settings, nextSettings, next2settings
+	var currentSettings, prevSettings, prev2settings, nextSettings, next2settings
 
 var currentCamera='001'
-var totalCam=116
+var totalCam=92
 
-var outWidth=640
+var outWidth=960
 var outHeight=640
 
 var flow=3
@@ -20,7 +20,9 @@ var flowMode=false
 var allSettings
 
 // var DOWNLOAD_IP='192.168.0.2'
-var DOWNLOAD_IP='localhost'
+//var DOWNLOAD_IP='localhost'
+
+var DOWNLOAD_IP = document.location.hostname
 
 var rotate
 
@@ -30,10 +32,15 @@ var loadPoints = function(vars,cur){
 
 	currentCamera=cur
 	current=parseInt(currentCamera)
+	console.log("current: "+current)
 	next=current+1
+	console.log("next: "+next)
 	next2=current+2
+	console.log("next2: "+next2)
 	prev=current-1
+	console.log("prev: "+prev)
 	prev2=current-2
+	console.log("prev2: "+prev2)
 
 	if(next<10) nextCamera="00"+next.toString()
 	else if (next<100) nextCamera="0"+next.toString()
@@ -43,16 +50,19 @@ var loadPoints = function(vars,cur){
 	else if (next2<100) next2Camera="0"+next2.toString()
 	else next2Camera=next2.toString()
 
-	if(prev<10) prevCamera="00"+next.toString()
-	else if(prev<100) prevCamera="0"+next.toString()
+	if(prev<10) prevCamera="00"+prev.toString()
+	else if(prev<100) prevCamera="0"+prev.toString()
 	else prevCamera=prev.toString()
 
-	if(prev2<10) prev2Camera="00"+next.toString()
-	else if(prev2<100) prev2Camera="0"+next.toString()
+	if(prev2<10) prev2Camera="00"+prev2.toString()
+	else if(prev2<100) prev2Camera="0"+prev2.toString()
 	else prev2Camera=prev2.toString()
 
-	console.log("NEXT: "+nextCamera)
-	console.log("CURRENT:"+parseInt(currentCamera))
+	console.log(vars[prev2-1])
+	console.log(vars[prev-1])
+	console.log(vars[current-1])
+	console.log(vars[next-1])
+	console.log(vars[next2-1])
 
 	currentSettings=vars[current-1]
 
@@ -62,7 +72,7 @@ var loadPoints = function(vars,cur){
 		// prevPoints=vars[prev-1].warp
 	}
 	if(current>2){
-		prev2Settings=vars[prev-2]
+		prev2Settings=vars[prev2-1]
 		// prevPoints=vars[prev-1].warp
 	}
 	if(current<totalCam-1){
@@ -71,7 +81,7 @@ var loadPoints = function(vars,cur){
 	}
 	if(current<totalCam-2){
 		// nextPoints=vars[next-1].warp
-		next2Settings=vars[next]
+		next2Settings=vars[next2-1]
 	}
 
 }
@@ -126,29 +136,28 @@ $(document).ready(function(){
 		}//img.onload
 
 		img.crossOrigin = ''
-		img.src = "http://"+DOWNLOAD_IP+":3001/post/"+currentCamera+".jpg"
+		img.src = "http://"+DOWNLOAD_IP+":3001/calibration/"+currentCamera+".jpg"
 
 		if(current>1){
 				prevImg.onerror = function(){
 					prev--
-					prev2--
 					if(prev<10) prevCamera="00"+prev
 					else if(prev<100) prevCamera="0"+prev
 					else prevCamera=prev
-					if(prev>0){
-							prevSettings=allSettings[prev-1]
-							console.log(prevCamera)
-							xrevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
-					}
+
+					prevSettings=allSettings[prev-1]
+					console.log(prevCamera)
+					prevImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prevCamera+".jpg"
+
 				}
 				prevImg.onload = function(){
 					prevCtx.clearRect(0,0,c.width, c.height)
 					prevCtx.globalAlpha=.5
-					prevCtx.rotate(prevSettings[rotate])
+					prevCtx.rotate(prevSettings['rotate'])
 					prevCtx.drawImage(prevImg,0,0,960,640)
 				}//onload
 				prevImg.crossOrigin = ''
-				prevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
+				prevImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prevCamera+".jpg"
 			}//current!=0
 
 			if(current>2){
@@ -157,42 +166,41 @@ $(document).ready(function(){
 						if(prev2<10) prev2Camera="00"+prev2
 						else if(prev2<100) prev2Camera="0"+prev2
 						else prev2Camera=prev2
-						if(prev2>0){
+
 								prev2Settings=allSettings[prev2-1]
 								console.log(prev2Camera)
-								prev2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+prev2Camera+".jpg"
-						}
+								prev2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prev2Camera+".jpg"
+
 					}
 					prev2Img.onload = function(){
 						prev2Ctx.clearRect(0,0,c.width, c.height)
 						prev2Ctx.globalAlpha=.5
-						prev2Ctx.rotate(prev2Settings[rotate])
+						prev2Ctx.rotate(prev2Settings['rotate'])
 						prev2Ctx.drawImage(prev2Img,0,0,960,640)
 					}//onload
 					prev2Img.crossOrigin = ''
-					prev2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+prev2Camera+".jpg"
+					prev2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prev2Camera+".jpg"
 				}//current!=0
 
 		if(current<totalCam-1){
 			nextImg.onerror=function(){
 				next++
-				next2++
 				if(next<10) nextCamera="00"+next.toString()
 				else if(next<100) nextCamera="0"+next.toString()
 				else nextCamera=next.toString()
-				if(next<totalCam){
+
 					nextSettings=allSettings[next-1]
-					nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
-				}
+					nextImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+nextCamera+".jpg"
+
 			}
 			nextImg.onload = function(){
 				nextCtx.clearRect(0,0,c.width, c.height)
 				nextCtx.globalAlpha=.5
-				nextCtx.rotate(nextSettings[rotate])
+				nextCtx.rotate(nextSettings['rotate'])
 				nextCtx.drawImage(nextImg,0,0,960,640)
 			}
 			nextImg.crossOrigin=''
-			nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
+			nextImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+nextCamera+".jpg"
 		}//curent!=totalCam
 
 
@@ -202,20 +210,26 @@ $(document).ready(function(){
 			if(next2<10) next2Camera="00"+next2.toString()
 			else if(next2<100) next2Camera="0"+next2.toString()
 			else next2Camera=next2.toString()
-			if(next2<totalCam){
+
 				next2Settings=allSettings[next2-1]
-				next2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+next2Camera+".jpg"
-			}
+				next2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+next2Camera+".jpg"
+
 		}
 		next2Img.onload = function(){
 			next2Ctx.clearRect(0,0,c.width, c.height)
 			next2Ctx.globalAlpha=.5
-			next2Ctx.rotate(next2Settings[rotate])
+			next2Ctx.rotate(next2Settings['rotate'])
 			next2Ctx.drawImage(next2Img,0,0,960,640)
 		}
 		next2Img.crossOrigin=''
-		next2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+next2Camera+".jpg"
+		next2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+next2Camera+".jpg"
 	}//curent!=totalCam
+
+	console.log(allSettings[prev2-1])
+	console.log(allSettings[prev-1])
+	console.log(allSettings[current-1])
+	console.log(allSettings[next-1])
+	console.log(allSettings[next2-1])
 
 		$('#onion-skin').click(function(){
 			if($('#before').is(':checked')) bPrev=true
@@ -229,7 +243,7 @@ $(document).ready(function(){
 		$(document).keydown(function(event){
 			console.log(event.which)
 
-if(flowMode==false){
+		if(flowMode==false){
 			var rotateModifier=Math.PI/180
 
 			if(event.shiftKey==true){
@@ -244,7 +258,7 @@ if(flowMode==false){
 				moveModifier=1
 			}
 
-			if(event.which==38){
+			if(event.which==40){
 				event.preventDefault()
 				// if(method=="psr"){
 
@@ -254,24 +268,114 @@ if(flowMode==false){
 			event.preventDefault()
 			flowMode=!flowMode
 			drawOutput()
+			if(flowMode==true){
+				prev2C.width=prev2C.width
+				prevC.width=prevC.width
+				nextC.width=nextC.width
+				next2C.width=next2C.width
+
+				prev2Ctx.globalAlpha=1
+				prevCtx.globalAlpha=1
+				next2Ctx.globalAlpha=1
+				nextCtx.globalAlpha=1
+
+
+
+
+
+
+
+prev2Ctx.save()
+prev2Ctx.translate(prev2C.width/2,prev2C.height/2)
+				prev2Ctx.rotate(parseFloat(prev2Settings['rotate']))
+				prev2Ctx.translate(-prev2C.width/2,-prev2C.height/2)
+				prev2Ctx.drawImage(prev2Img,0,0,960,640)
+prev2Ctx.restore()
+
+prevCtx.save()
+prevCtx.translate(prevC.width/2,prevC.height/2)
+				prevCtx.rotate(parseFloat(prevSettings['rotate']))
+				prevCtx.translate(-prevC.width/2,-prevC.height/2)
+				prevCtx.drawImage(prevImg,0,0,960,640)
+prevCtx.restore()
+
+nextCtx.save()
+nextCtx.translate(nextC.width/2,nextC.height/2)
+				nextCtx.rotate(parseFloat(nextSettings['rotate']))
+				nextCtx.translate(-nextC.width/2,-nextC.height/2)
+				nextCtx.drawImage(nextImg,0,0,960,640)
+nextCtx.restore()
+
+next2Ctx.save()
+next2Ctx.translate(next2C.width/2,next2C.height/2)
+				next2Ctx.rotate(parseFloat(next2Settings['rotate']))
+				next2Ctx.translate(-next2C.width/2,-next2C.height/2)
+				next2Ctx.drawImage(next2Img,0,0,960,640)
+next2Ctx.restore()
+}
+
+		else{
+			prev2C.width=prev2C.width
+			prevC.width=prevC.width
+			nextC.width=nextC.width
+			next2C.width=next2C.width
+
+prev2Ctx.save()
+prev2Ctx.translate(prev2C.width/2,prev2C.height/2)
+				prev2Ctx.rotate(parseFloat(prev2Settings['rotate']))
+				prev2Ctx.translate(-prev2C.width/2,-prev2C.height/2)
+				prev2Ctx.drawImage(prev2Img,0,0,960,640)
+prev2Ctx.restore()
+
+prevCtx.save()
+prevCtx.translate(prevC.width/2,prevC.height/2)
+				prevCtx.rotate(parseFloat(prevSettings['rotate']))
+				prevCtx.translate(-prevC.width/2,-prevC.height/2)
+				prevCtx.drawImage(prevImg,0,0,960,640)
+prevCtx.restore()
+
+nextCtx.save()
+nextCtx.translate(nextC.width/2,nextC.height/2)
+				nextCtx.rotate(parseFloat(nextSettings['rotate']))
+				nextCtx.translate(-nextC.width/2,-nextC.height/2)
+				nextCtx.drawImage(nextImg,0,0,960,640)
+nextCtx.restore()
+
+next2Ctx.save()
+next2Ctx.translate(next2C.width/2,next2C.height/2)
+				next2Ctx.rotate(parseFloat(next2Settings['rotate']))
+				next2Ctx.translate(-next2C.width/2,-next2C.height/2)
+				next2Ctx.drawImage(next2Img,0,0,960,640)
+next2Ctx.restore()
+
+			prev2Ctx.globalAlpha=.5
+			prevCtx.globalAlpha=.5
+			next2Ctx.globalAlpha=.5
+			nextCtx.globalAlpha=.5
+
+			prev2Ctx.drawImage(prev2Img,0,0,960,640)
+			prevCtx.drawImage(prevImg,0,0,960,640)
+			next2Ctx.drawImage(next2Img,0,0,960,640)
+			nextCtx.drawImage(nextImg,0,0,960,640)
+		}
 		}
 		else if(event.which==71){
 			event.preventDefault()
 			bCross=!bCross
 			drawOutput()
 		}
-			else if(event.which==39){
+			else if(event.which==37){
 				event.preventDefault()
 				// if(method=="psr"){
 				adjustPosition(moveModifier,0)
 			}
-			else if(event.which==40){
+			else if(event.which==38){
 				event.preventDefault()
 				// if(method=="psr"){
 						adjustPosition(0,moveModifier)
 
 			}
-			else if(event.which==37){
+			else if(event.which==39){
 				event.preventDefault()
 				adjustPosition(-moveModifier,0)
 
@@ -286,11 +390,15 @@ if(flowMode==false){
 			}
 
 			else if(event.which==189){
+				if(event.metaKey==false){
 				adjustRotate(rotateModifier)
+			}
 			}
 
 			else if(event.which==187){
+				if(event.metaKey==false){
 				adjustRotate(-rotateModifier)
+			}
 			}
 
 		}
@@ -330,26 +438,11 @@ function drawOutput(){
 	var destC = document.getElementById('image-output');
 	var destCtx = destC.getContext('2d');
 
-	drawImage()
+	// drawImage()
 
 	destC.width = destC.width; // clear the canvas
 
 	if(flowMode==false){
-
-		prev2C.width=prev2C.width
-		prevC.width=prevC.width
-		nextC.width=nextC.width
-		next2C.width=next2C.width
-
-		prev2Ctx.globalAlpha=1
-		prevCtx.globalAlpha=1
-		next2Ctx.globalAlpha=1
-		nextCtx.globalAlpha=1
-
-		prev2Ctx.drawImage(prev2Img,0,0,960,640)
-		prevCtx.drawImage(prevImg,0,0,960,640)
-		next2Ctx.drawImage(next2Img,0,0,960,640)
-		nextCtx.drawImage(nextImg,0,0,960,640)
 
 		destCtx.drawImage(c, currentSettings['x'], currentSettings['y'],currentSettings['w'],currentSettings['h'],0,0,640,640)
 
@@ -363,28 +456,14 @@ function drawOutput(){
 	}
 
 else{
-
-	prev2C.width=prev2C.width
-	prevC.width=prevC.width
-	nextC.width=nextC.width
-	next2C.width=next2C.width
-
-	prev2Ctx.globalAlpha=1
-	prevCtx.globalAlpha=1
-	next2Ctx.globalAlpha=1
-	nextCtx.globalAlpha=1
-
-	prev2Ctx.drawImage(prev2Img,0,0,960,640)
-	prevCtx.drawImage(prevImg,0,0,960,640)
-	next2Ctx.drawImage(next2Img,0,0,960,640)
-	nextCtx.drawImage(nextImg,0,0,960,640)
-
-	if(flow==1) destCtx.drawImage(prev2C, prev2Settings['x'], prev2Settings['y'],prev2Settings['w'],prev2Settings['h'],0,0,640,640)
+	if(flow==1) {
+		destCtx.drawImage(prev2C, prev2Settings['x'], prev2Settings['y'],prev2Settings['w'],prev2Settings['h'],0,0,640,640)
+	}
 	else if(flow==2) destCtx.drawImage(prevC, prevSettings['x'], prevSettings['y'],prevSettings['w'],prevSettings['h'],0,0,640,640)
 	else if(flow==3) destCtx.drawImage(c, currentSettings['x'], currentSettings['y'],currentSettings['w'],currentSettings['h'],0,0,640,640)
 	else if(flow==4) destCtx.drawImage(nextC, nextSettings['x'], nextSettings['y'],nextSettings['w'],nextSettings['h'],0,0,640,640)
 	else if(flow==5) destCtx.drawImage(next2C, next2Settings['x'], next2Settings['y'],next2Settings['w'],next2Settings['h'],0,0,640,640)
-	console.log(next2)
+
 }
 
 	if(bCross==true){
@@ -415,15 +494,11 @@ else{
 
 	function drawImage(){
 			ctx.clearRect(0,0,c.width, c.height)
-			console.log(currentSettings['rotate'])
-			// ctx.rotate(currentSettings['rotate'])
-
 			ctx.save()
 			ctx.translate(c.width/2,c.height/2)
-
 			ctx.rotate(parseFloat(currentSettings['rotate']))
 			ctx.translate(-c.width/2,-c.height/2)
-			ctx.drawImage(img,0,0,c.width,c.height)
+			ctx.drawImage(img,0,0,960,640)
 			ctx.restore()
 
 
@@ -446,6 +521,18 @@ else{
 
 	function adjustRotate (angle){
 		currentSettings["rotate"]=parseFloat(currentSettings['rotate'])+angle
+		drawImage()
 		drawOutput()
 	}
+
+	$('#trigger').submit(function(e){
+		e.preventDefault()
+		$.ajax({
+		  url: $(this).attr('action'),
+			data: $(this).serialize(),
+			success:function(){
+				location.reload()
+			}
+		});
+	})
 })

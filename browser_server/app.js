@@ -32,6 +32,7 @@ var images=require( __dirname +'/routes/images');
 var cameras = require( __dirname+'/routes/cameras')
 var takes = require(__dirname+'/routes/takes')
 var processing=require( __dirname +'/routes/processing');
+var calibration=require( __dirname +'/routes/calibration');
 
 
 app.locals._ = _
@@ -192,8 +193,10 @@ app.get('/controller',controls.renderPage(Database))
 app.get('/trigger',controls.triggerCameras())
 app.get('/cameras/ping',controls.pingCameras())
 app.get('/images',images.renderPage(Database))
+app.get('/calibration',calibration.renderPage(Database))
 app.post('/save-image',images.saveImage(Database))
 app.get('/set-camera',images.setCamera())
+app.get('/set-calibration',calibration.setCamera())
 app.get('/gitpull',controls.gitPull(Database))
 app.get('/shutdown',controls.shutdown(Database))
 app.post('/cameras/init',settings.initCamera())

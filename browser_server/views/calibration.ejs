@@ -1,0 +1,66 @@
+<% /* SCENES SINGLE PAGE */ %>
+<% include includes/header %>
+
+<canvas id="image-editor" width="720" height="480" style="display:none" ></canvas>
+<canvas id="image-output" width="720" height="480" style="left:0px; width:720px;"></canvas>
+<canvas id="image-previous" width="720" height="480" style="display:none"></canvas>
+<canvas id="image-next" width="720" height="480" style="display:none"></canvas>
+<canvas id="image-previous2" width="720" height="480" style="display:none"></canvas>
+<canvas id="image-next2" width="720" height="480" style="display:none"></canvas>
+
+<form id="select-edit-method" style="display:none">
+<input type="radio" id="psr" value="psr" checked>Position, Scale, Rotate</input>
+<input type="radio" id="quad" value="quad">Quad</input>
+</form>
+
+<form id="calibration-select" method="get" action="/set-calibration">
+<strong>Select Camera:</strong>
+<select name="camera_id">
+<% for (var i=0;i<cameras.length;i++){%>
+	<option value=<%= cameras[i].camera_id %> <% if(cameras[i].camera_id==currentCamera){%><%= "selected" %><%}%> >
+	<%= cameras[i].camera_id %>
+<%}%>
+</select>
+<input type="submit" value="Change Camera">
+</form>
+
+<form id="trigger" method="get" action=<% for (var i=0;i<cameras.length;i++){%>
+	<% if(cameras[i].camera_id==currentCamera){%>
+		<%= "http://"+cameras[i].address+":8080/trigger" %>
+	<%}%>
+<%}%>>
+<input type="submit" value="Refresh Camera">
+</form>
+
+<form id="onion-skin">
+	<strong>Set Onion:</strong>
+	<input type="checkbox" id="before" value="before">-1 Frame</input>
+	<input type="checkbox" id="after" value="after">+1 Frame</input>
+</form>
+
+<script src='/js/vendor/jquery-2.0.3.min.js'></script>
+
+<script src="/js/calibration.js"></script>
+
+<script>
+
+	var currentCam
+
+	<% for (var i=0;i<cameras.length;i++){%>
+	<% if(cameras[i].camera_id==currentCamera){%>
+
+	currentCam=<%- JSON.stringify(currentCamera) %>
+
+	<%}
+
+	}%>
+
+	var settings=<%- JSON.stringify(cameras) %>
+
+	console.log("ejs: " + currentCam)
+	console.log("ejs: " + settings[0]['rotate'])
+	loadPoints(settings,currentCam)
+</script>
+
+
+<% include includes/footer %>

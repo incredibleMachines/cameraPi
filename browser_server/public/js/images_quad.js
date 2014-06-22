@@ -102,7 +102,7 @@ $(document).ready(function(){
 		}
 
 		img.crossOrigin = ''
-		img.src = "http://"+DOWNLOAD_IP+":3001/post/"+currentCamera+".jpg"
+		img.src = "http://"+DOWNLOAD_IP+":3001/calibration/"+currentCamera+".jpg"
 
 		if(current!=0){
 				prevImg.onload = function(){
@@ -111,7 +111,7 @@ $(document).ready(function(){
 					prevCtx.drawImage(prevImg,imgPoints[0]["x"],imgPoints[0]["y"],imgPoints[2]["x"],imgPoints[2]["y"])
 				}
 				prevImg.crossOrigin = ''
-				prevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
+				prevImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+nextCamera+".jpg"
 			}
 
 		if(current!=totalCam){
@@ -121,7 +121,7 @@ $(document).ready(function(){
 				nextCtx.drawImage(nextImg,imgPoints[0]["x"],imgPoints[0]["y"],imgPoints[2]["x"],imgPoints[2]["y"])
 			}
 			nextImg.crossOrigin=''
-			nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
+			nextImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prevCamera+".jpg"
 		}
 
 
