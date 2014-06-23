@@ -7,8 +7,8 @@ var gm = require('gm')
 var async = require('async')
 var rimraf = require('rimraf')//recursive directory removal
 
-var width = 4272/1440
-var height = 2848/960
+var width = 4272/960
+var height = 2848/640
 
 var take='';
 var framerate = 30

@@ -222,19 +222,21 @@ exports.processed = function(MongoDB){
 	}
 }
 
-exports.reset = function(){
+exports.reset = function(MongoDB, outcome, time){
 	//return function(req,res){
-		console.log("Reset Message")
+		//console.log("Reset Message")
 
-				/* BETA BETA BETA */
 				var data = {
 											app: 'SKILL_TRACK',
 											action: 'FINISH',
 											takeawayId: currentTake._id,
 											participantCode: currentTake.participantCode,
-											filename: currentTake._id+'/output.mov'
+											outcome: outcome,
+											time: time
+											//filename: currentTake._id+'/output.mov'
 
 				}
+				console.log(data)
 				socket = net.Socket()
 				socket.connect(BOLSTER_PORT,BOLSTER_IP)
 				socket.on("connect",function(){
@@ -317,6 +319,24 @@ function reconnect(address,count){
 }//endif count<10
 }
 
+
+  function finish(_take,_participantCode, _outcome, _time){
+    var timeoutTime = 60000 //180000 //three minutes //300000/ //five minutes
+    console.log('Finish Queued.')
+    console.log('Timeout: '+timeoutTime)
+    socket.emit('finish',{take:_take, participant:_participantCode,outcome:_outcome,time:_time})
+    // setTimeout(function(__take,__participantCode){
+    //   console.log('Attempting Processing of Output')
+    //   console.log(__take+' '+__participantCode)
+    //   $.getJSON('http://'+PROCESSING_IP+':3002/?take='+__take+'&participant='+__participantCode).done(function(json){
+    //     console.log('POSTED')
+    //   }).fail(function(jqxhr,status,error){
+    //     console.log('PROCESS ERROR')
+    //   })
+    // }(_take,_participantCode),timeoutTime)
+
+
+  }
 
 
 /* DEPRECATED */

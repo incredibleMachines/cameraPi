@@ -5,8 +5,8 @@ var currentSettings, prevSettings, prev2settings, nextSettings, next2settings
 var currentCamera='001'
 var totalCam=116
 
-var outWidth=480
-var outHeight=480
+var outWidth=640
+var outHeight=640
 
 var flow=3
 
@@ -450,8 +450,8 @@ destCtx.lineWidth=.5
 destCtx.stroke()
 
 destCtx.beginPath()
-destCtx.moveTo(0,c.height/2)
-destCtx.lineTo(c.width,c.height/2)
+destCtx.moveTo(0,c.height/4)
+destCtx.lineTo(c.width,c.height/4)
 destCtx.closePath()
 destCtx.strokeStyle = '#ff0000'
 destCtx.lineWidth=.5

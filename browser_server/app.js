@@ -128,20 +128,21 @@ io.sockets.on('connection', function(socket){
     udpclient.send(resetMessage,0,resetMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
       if(err) console.error(err)
       udpclient.close()
-			controls.reset(Database)
+
+			controls.reset(Database,data.outcome,data.time)
     })
   })
 	socket.on('finish',function(data){
 		console.log('got finish message')
 		console.log(data)
-		//controls.reset(Database)
+		//controls.reset(Database,data.outcome,data.time)
 
 		var udpclient = dgram.createSocket("udp4");
 		var resetMessage = new Buffer('reset')
 		udpclient.send(resetMessage,0,resetMessage.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
 			if(err) console.error(err)
 			udpclient.close()
-			controls.reset(Database)
+			controls.reset(Database, data.outcome, data.time)
 		})
 
 		//set timeout
@@ -150,24 +151,7 @@ io.sockets.on('connection', function(socket){
 
 		Database.updateByID('takes', data._id, {$set: {status: 'queued'}},function(err){
 			console.log('timeout: '+timeout)
-			// setTimeout(function(_data){
-			// 	//data = { take: '53a43580d5d8201115a50ed2', participant: 'OAX4G' }
-			//
-			// 	console.log('-------------------------')
-			// 	console.log('Making Process Request.')
-			// 	console.log('-------------------------')
-			//
-			// 	http.get('http://'+PROCESSING_IP+':3002?take='+data.take+'&participant='+data.participant,function(res){
-			// 		Database.updateByID('takes',_data._id,{$set:{status:'submitted'}},function(_err){
-			// 			console.log('Updated Take '+_data._id + 'to submitted')
-			// 		})
-			// 		console.log('Response')
-			//
-			// 	}).on('error',function(err){
-			// 		console.log('post')
-			// 	})
 
-			//}(data),timeout)
 		})
 	})
 })

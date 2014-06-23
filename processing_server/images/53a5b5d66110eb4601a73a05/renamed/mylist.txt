@@ -102,5 +102,3 @@ file '/Users/controlfreak/Desktop/cameraPi/processing_server/images/53a5b5d66110
 file '/Users/controlfreak/Desktop/cameraPi/processing_server/images/53a5b5d66110eb4601a73a05/renamed/101.jpg'
 file '/Users/controlfreak/Desktop/cameraPi/processing_server/images/53a5b5d66110eb4601a73a05/renamed/102.jpg'
 file '/Users/controlfreak/Desktop/cameraPi/processing_server/images/53a5b5d66110eb4601a73a05/renamed/103.jpg'
-file '/Users/controlfreak/Desktop/cameraPi/processing_server/images/53a5b5d66110eb4601a73a05/renamed/104.jpg'
-file '/Users/controlfreak/Desktop/cameraPi/processing_server/images/53a5b5d66110eb4601a73a05/renamed/105.jpg'

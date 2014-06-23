@@ -1,5 +1,7 @@
 function ControlController(cameras){
   console.log(cameras)
+
+  var start, end;
   //system IPS
   var BROWSER_IP = '192.168.0.2:3000',
       DOWNLOAD_IP = '192.168.0.2:3001',
@@ -24,6 +26,17 @@ function ControlController(cameras){
   // socket.on('data', function(data){
   //   //alert(JSON.stringify(data))
   // })
+
+  //testing message sending back
+
+  //   start = new Date().getTime()
+  // console.log('start: '+start)
+  //   setTimeout(function(){
+  //     console.log('sending finish ')
+  //     end = new Date().getTime()
+  //     var time = end-start
+  //     finish( take, participantCode, 'goal' ,time)
+  //   },5000)
 
   socket.on('QRSCAN',function(data){
     console.log(JSON.stringify(data))
@@ -87,11 +100,12 @@ function ControlController(cameras){
   $('.go').click(function(){
     sendMessage('go')
     setToActive()
+    start = new Date().getTime()
 
   })
 
   $('.kick').click(function(){
-    sendMessage('kick')
+    //sendMessage('kick')
   })
   $('.miss').click(function(){
     $(".controller").removeClass().addClass('controller').addClass("IDLE")
@@ -124,6 +138,7 @@ function ControlController(cameras){
 
   $('.reset').click(function(){
     sendMessage('reset')
+    //console.log('reset')
     $(".controller").removeClass().addClass('controller').addClass("IDLE")
     $(".SYSTEM_ACTIVE").hide()
     $(".SYSTEM_ARMED").hide()
@@ -135,12 +150,26 @@ function ControlController(cameras){
     $('.code').html(' ')
   })
   $(".SYSTEM_ACTIVE .reset, .SYSTEM_ACTIVE .goal, .SYSTEM_ACTIVE .wiff, .SYSTEM_ACTIVE .miss, .SYSTEM_ACTIVE .kick").click(function(){
+    end = new Date().getTime()
+    var time = end-start
+    var outcome = ''
 
-    finish(take,participantCode)
+    if($(this).hasClass('goal')){
+      outcome = 'goal'
+    }else if($(this).hasClass('reset') ){
+      outcome = 'reset'
+    }else if( $(this).hasClass('wiff') || $(this).hasClass('miss')  || $(this).hasClass('kick') ){
+      outcome = 'miss'
+    }
+    console.log(outcome)
+    console.log(time)
+    console.log(take)
+    console.log(participantCode)
+    finish(take,participantCode,outcome,time)
 
   })
-  function sendMessage(msg){
-    socket.emit(msg,{timestamp: new Date().getTime()})
+  function sendMessage(msg,data){
+      socket.emit(msg,{timestamp: new Date().getTime()})
   }
   function setToActive(){
     $('.controller').removeClass().addClass('controller').addClass('SYSTEM_ACTIVE')
@@ -248,11 +277,11 @@ function ControlController(cameras){
 
 
 
-  function finish(_take,_participantCode){
+  function finish(_take,_participantCode, _outcome, _time){
     var timeoutTime = 60000 //180000 //three minutes //300000/ //five minutes
     console.log('Finish Queued.')
     console.log('Timeout: '+timeoutTime)
-    socket.emit('finish',{take:_take, participant:_participantCode})
+    socket.emit('finish',{take:_take, participant:_participantCode,outcome:_outcome,time:_time})
     // setTimeout(function(__take,__participantCode){
     //   console.log('Attempting Processing of Output')
     //   console.log(__take+' '+__participantCode)

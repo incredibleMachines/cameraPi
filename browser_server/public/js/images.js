@@ -3,9 +3,9 @@ var editPoints, prevPoints, nextPoints
 	var currentSettings, prevSettings, prev2settings, nextSettings, next2settings
 
 var currentCamera='001'
-var totalCam=92
+var totalCam=91
 
-var outWidth=960
+var outWidth=640
 var outHeight=640
 
 var flow=3
@@ -136,7 +136,7 @@ $(document).ready(function(){
 		}//img.onload
 
 		img.crossOrigin = ''
-		img.src = "http://"+DOWNLOAD_IP+":3001/calibration/"+currentCamera+".jpg"
+		img.src = "http://"+DOWNLOAD_IP+":3001/post/"+currentCamera+".jpg"
 
 		if(current>1){
 				prevImg.onerror = function(){
@@ -147,7 +147,7 @@ $(document).ready(function(){
 
 					prevSettings=allSettings[prev-1]
 					console.log(prevCamera)
-					prevImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prevCamera+".jpg"
+					prevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
 
 				}
 				prevImg.onload = function(){
@@ -157,7 +157,7 @@ $(document).ready(function(){
 					prevCtx.drawImage(prevImg,0,0,960,640)
 				}//onload
 				prevImg.crossOrigin = ''
-				prevImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prevCamera+".jpg"
+				prevImg.src="http://"+DOWNLOAD_IP+":3001/post/"+prevCamera+".jpg"
 			}//current!=0
 
 			if(current>2){
@@ -169,7 +169,7 @@ $(document).ready(function(){
 
 								prev2Settings=allSettings[prev2-1]
 								console.log(prev2Camera)
-								prev2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prev2Camera+".jpg"
+								prev2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+prev2Camera+".jpg"
 
 					}
 					prev2Img.onload = function(){
@@ -179,7 +179,7 @@ $(document).ready(function(){
 						prev2Ctx.drawImage(prev2Img,0,0,960,640)
 					}//onload
 					prev2Img.crossOrigin = ''
-					prev2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+prev2Camera+".jpg"
+					prev2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+prev2Camera+".jpg"
 				}//current!=0
 
 		if(current<totalCam-1){
@@ -190,7 +190,7 @@ $(document).ready(function(){
 				else nextCamera=next.toString()
 
 					nextSettings=allSettings[next-1]
-					nextImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+nextCamera+".jpg"
+					nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
 
 			}
 			nextImg.onload = function(){
@@ -200,7 +200,7 @@ $(document).ready(function(){
 				nextCtx.drawImage(nextImg,0,0,960,640)
 			}
 			nextImg.crossOrigin=''
-			nextImg.src="http://"+DOWNLOAD_IP+":3001/calibration/"+nextCamera+".jpg"
+			nextImg.src="http://"+DOWNLOAD_IP+":3001/post/"+nextCamera+".jpg"
 		}//curent!=totalCam
 
 
@@ -212,7 +212,7 @@ $(document).ready(function(){
 			else next2Camera=next2.toString()
 
 				next2Settings=allSettings[next2-1]
-				next2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+next2Camera+".jpg"
+				next2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+next2Camera+".jpg"
 
 		}
 		next2Img.onload = function(){
@@ -222,7 +222,7 @@ $(document).ready(function(){
 			next2Ctx.drawImage(next2Img,0,0,960,640)
 		}
 		next2Img.crossOrigin=''
-		next2Img.src="http://"+DOWNLOAD_IP+":3001/calibration/"+next2Camera+".jpg"
+		next2Img.src="http://"+DOWNLOAD_IP+":3001/post/"+next2Camera+".jpg"
 	}//curent!=totalCam
 
 	console.log(allSettings[prev2-1])
@@ -236,6 +236,7 @@ $(document).ready(function(){
 			else bPrev=false
 			if($('#after').is(':checked')) bNext=true
 			else bNext=false
+				drawImage()
 			drawOutput()
 		})//.click
 
@@ -268,6 +269,7 @@ $(document).ready(function(){
 			event.preventDefault()
 			flowMode=!flowMode
 			drawOutput()
+
 			if(flowMode==true){
 				prev2C.width=prev2C.width
 				prevC.width=prevC.width
@@ -279,84 +281,32 @@ $(document).ready(function(){
 				next2Ctx.globalAlpha=1
 				nextCtx.globalAlpha=1
 
+// drawImage()
 
 
 
 
 
 
-prev2Ctx.save()
-prev2Ctx.translate(prev2C.width/2,prev2C.height/2)
-				prev2Ctx.rotate(parseFloat(prev2Settings['rotate']))
-				prev2Ctx.translate(-prev2C.width/2,-prev2C.height/2)
-				prev2Ctx.drawImage(prev2Img,0,0,960,640)
-prev2Ctx.restore()
-
-prevCtx.save()
-prevCtx.translate(prevC.width/2,prevC.height/2)
-				prevCtx.rotate(parseFloat(prevSettings['rotate']))
-				prevCtx.translate(-prevC.width/2,-prevC.height/2)
-				prevCtx.drawImage(prevImg,0,0,960,640)
-prevCtx.restore()
-
-nextCtx.save()
-nextCtx.translate(nextC.width/2,nextC.height/2)
-				nextCtx.rotate(parseFloat(nextSettings['rotate']))
-				nextCtx.translate(-nextC.width/2,-nextC.height/2)
-				nextCtx.drawImage(nextImg,0,0,960,640)
-nextCtx.restore()
-
-next2Ctx.save()
-next2Ctx.translate(next2C.width/2,next2C.height/2)
-				next2Ctx.rotate(parseFloat(next2Settings['rotate']))
-				next2Ctx.translate(-next2C.width/2,-next2C.height/2)
-				next2Ctx.drawImage(next2Img,0,0,960,640)
-next2Ctx.restore()
 }
 
 		else{
+
+
+
 			prev2C.width=prev2C.width
 			prevC.width=prevC.width
 			nextC.width=nextC.width
 			next2C.width=next2C.width
-
-prev2Ctx.save()
-prev2Ctx.translate(prev2C.width/2,prev2C.height/2)
-				prev2Ctx.rotate(parseFloat(prev2Settings['rotate']))
-				prev2Ctx.translate(-prev2C.width/2,-prev2C.height/2)
-				prev2Ctx.drawImage(prev2Img,0,0,960,640)
-prev2Ctx.restore()
-
-prevCtx.save()
-prevCtx.translate(prevC.width/2,prevC.height/2)
-				prevCtx.rotate(parseFloat(prevSettings['rotate']))
-				prevCtx.translate(-prevC.width/2,-prevC.height/2)
-				prevCtx.drawImage(prevImg,0,0,960,640)
-prevCtx.restore()
-
-nextCtx.save()
-nextCtx.translate(nextC.width/2,nextC.height/2)
-				nextCtx.rotate(parseFloat(nextSettings['rotate']))
-				nextCtx.translate(-nextC.width/2,-nextC.height/2)
-				nextCtx.drawImage(nextImg,0,0,960,640)
-nextCtx.restore()
-
-next2Ctx.save()
-next2Ctx.translate(next2C.width/2,next2C.height/2)
-				next2Ctx.rotate(parseFloat(next2Settings['rotate']))
-				next2Ctx.translate(-next2C.width/2,-next2C.height/2)
-				next2Ctx.drawImage(next2Img,0,0,960,640)
-next2Ctx.restore()
 
 			prev2Ctx.globalAlpha=.5
 			prevCtx.globalAlpha=.5
 			next2Ctx.globalAlpha=.5
 			nextCtx.globalAlpha=.5
 
-			prev2Ctx.drawImage(prev2Img,0,0,960,640)
-			prevCtx.drawImage(prevImg,0,0,960,640)
-			next2Ctx.drawImage(next2Img,0,0,960,640)
-			nextCtx.drawImage(nextImg,0,0,960,640)
+// drawImage()
+
+
 		}
 		}
 		else if(event.which==71){
@@ -438,8 +388,6 @@ function drawOutput(){
 	var destC = document.getElementById('image-output');
 	var destCtx = destC.getContext('2d');
 
-	// drawImage()
-
 	destC.width = destC.width; // clear the canvas
 
 	if(flowMode==false){
@@ -501,6 +449,53 @@ else{
 			ctx.drawImage(img,0,0,960,640)
 			ctx.restore()
 
+prev2C.width=prev2C.width
+prevC.width=prevC.width
+nextC.width=nextC.width
+next2C.width=next2C.width
+
+prev2Ctx.globalAlpha=.5
+prevCtx.globalAlpha=.5
+next2Ctx.globalAlpha=.5
+nextCtx.globalAlpha=.5
+
+
+if(current>2){
+prev2Ctx.save()
+				prev2Ctx.translate(prev2C.width/2,prev2C.height/2)
+				prev2Ctx.rotate(parseFloat(prev2Settings['rotate']))
+				prev2Ctx.translate(-prev2C.width/2,-prev2C.height/2)
+				prev2Ctx.drawImage(prev2Img,0,0,960,640)
+prev2Ctx.restore()
+}
+
+if(current>1){
+prevCtx.save()
+	prevCtx.translate(prevC.width/2,prevC.height/2)
+				prevCtx.rotate(parseFloat(prevSettings['rotate']))
+				prevCtx.translate(-prevC.width/2,-prevC.height/2)
+				prevCtx.drawImage(prevImg,0,0,960,640)
+prevCtx.restore()
+}
+
+if(current<totalCam-1){
+nextCtx.save()
+	nextCtx.translate(nextC.width/2,nextC.height/2)
+				nextCtx.rotate(parseFloat(nextSettings['rotate']))
+				nextCtx.translate(-nextC.width/2,-nextC.height/2)
+				nextCtx.drawImage(nextImg,0,0,960,640)
+nextCtx.restore()
+}
+
+if(current<totalCam-2){
+next2Ctx.save()
+				next2Ctx.translate(next2C.width/2,next2C.height/2)
+				next2Ctx.rotate(parseFloat(next2Settings['rotate']))
+				next2Ctx.translate(-next2C.width/2,-next2C.height/2)
+				next2Ctx.drawImage(next2Img,0,0,960,640)
+next2Ctx.restore()
+}
+
 
 
 	}
@@ -508,6 +503,7 @@ else{
 	function adjustPosition (x, y){
 		currentSettings["x"]=parseFloat(currentSettings["x"])+x
 		currentSettings["y"]=parseFloat(currentSettings["y"])+y
+		// drawImage()
 		drawOutput()
 	}
 
@@ -516,6 +512,7 @@ else{
 		currentSettings["y"]=parseFloat(currentSettings["y"])-amt/2
 		currentSettings["w"]=parseFloat(currentSettings["w"])+amt
 		currentSettings["h"]=parseFloat(currentSettings["h"])+amt
+		// drawImage()
 		drawOutput()
 	}
 
