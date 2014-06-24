@@ -180,6 +180,7 @@ app.get('/images',images.renderPage(Database))
 app.get('/calibration',calibration.renderPage(Database))
 app.post('/save-image',images.saveImage(Database))
 app.get('/set-camera',images.setCamera())
+app.post('/render-cropped',images.renderFrame())
 app.get('/set-calibration',calibration.setCamera())
 app.get('/gitpull',controls.gitPull(Database))
 app.get('/shutdown',controls.shutdown(Database))
@@ -194,6 +195,8 @@ app.get('/processed',controls.processed(Database,io))
 
 app.post('/scan',controls.scan(Database))
 app.post('/scanned',controls.scanned(Database,io))
+app.get('/scan',controls.fakeScan(Database,io))
+
 
 app.get('/takes',takes.index(Database))
 app.get('/take/:id',takes.findSingle(Database))

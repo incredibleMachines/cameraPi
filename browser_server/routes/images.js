@@ -5,8 +5,13 @@ var gm = require('gm')
 var exec = require('child_process').exec
 var currentCamera='001'
 
-var width = 4272/960
-var height = 2848/640
+
+//3456x2304
+
+var width = 3456/960
+var height = 2304/640
+
+var Render = require('../modules/take')
 
 exports.renderPage = function (MongoDB){
 
@@ -67,4 +72,15 @@ function sortByKey(array, key) {
         var x = a[key]; var y = b[key]
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
+}
+
+exports.renderFrame = function(){
+	return function(req,res){
+		var post=req.body
+		console.log("x : "+post.x)
+		Render.single(post,function(e){
+			console.log("done")
+			res.jsonp({crop:"finished"})
+		})
+	}
 }

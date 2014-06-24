@@ -1,7 +1,7 @@
 function ControlController(cameras){
   console.log(cameras)
 
-  var start, end;
+  var start = '', end= '';
   //system IPS
   var BROWSER_IP = '192.168.0.2:3000',
       DOWNLOAD_IP = '192.168.0.2:3001',

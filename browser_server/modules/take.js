@@ -6,7 +6,7 @@ var exec = require('child_process').exec
 var gm = require('gm')
 var async = require('async')
 var rimraf = require('rimraf')//recursive directory removal
-
+//3456x2304
 var width = 4272/960
 var height = 2848/640
 
@@ -18,6 +18,21 @@ var localPath =  "/Users/controlfreak/Desktop/cameraPi/processing_server/images"
 var remotePath =  "/Users/controlfreak/Desktop/cameraPi/download_server/images"
 
 var AE_PROCESSING_IP ='192.168.0.5'
+
+exports.single=function(data,callback){
+
+  console.log("single crop data: " + data['x'] )
+  var cam_id=data.camera_id
+  console.log('saving calibration image')
+  var path= "/Users/controlfreak/Desktop/cameraPi/download_server/public/post"
+
+  gm(path+"/originals/"+cam_id+".jpg").rotate('#fff',data.rotate*180 / Math.PI).crop(data.w*width,data.h*height,data.x*width,data.y*height).resize(640,640).write(path+"/cropped/"+cam_id+".jpg", function(e){
+    if(e) console.error(e)
+    else{
+      callback()
+    }
+  })
+}
 
 exports.run = function(take,participant,files,deviceList,callback){
   console.log('starting process of new take')
@@ -66,14 +81,10 @@ exports.run = function(take,participant,files,deviceList,callback){
           if(i==files.length-1){
             console.log("making txt file")
             var filestring =''
-            var outputPath=localPath+"/finals/"+participant+"_"+take
             // var outputFinalPath="/output/"+take+".mov"
             for(var i=0;i<files.length;i++){
               filestring+='file \''+localPath+'/'+take+'/renamed/'+i+'.jpg\'\n'
             }
-            fs.mkdir(outputPath,function(e){
-              if(e) console.error(e)
-                else{
             fs.writeFile(localPath+'/'+take+'/renamed/mylist.txt', filestring, function(err) {
               if(err) {
                 console.log("write file error")
@@ -122,8 +133,6 @@ exports.run = function(take,participant,files,deviceList,callback){
                 // })//end exec ffmpeg concat
               }//if(err)
             })//fse.writeFile
-          }
-          })
           }//if(lastfile)
         })//files.forEach
       }//endif(error)
@@ -131,6 +140,8 @@ exports.run = function(take,participant,files,deviceList,callback){
   }
 
   function processOutput(file,cb){
+
+
       console.log('processing New Output')
       if(file.indexOf('.jpg')>-1){
         console.log("GOT A JPG")
@@ -141,17 +152,15 @@ exports.run = function(take,participant,files,deviceList,callback){
         var currentCamera=_.findWhere(deviceList,{camera_id:cam_id})
         var filename= file.substr(0,file.indexOf('.'))
         if(typeof currentCamera!='undefined'){
-          console.log("start crop " +file)
-          console.log(currentCamera.w +' / '+ currentCamera.w*width)
-          console.log(currentCamera.h +' / '+ currentCamera.h*height)
-          console.log('rotate'+currentCamera.rotate)
-gm(localPath+"/"+take+"/originals/"+filename+".jpg").rotate('#fff',currentCamera.rotate*180 / Math.PI).crop(currentCamera.w*width,currentCamera.h*height,currentCamera.x*width,currentCamera.y*height).resize(640,null).write(localPath+"/"+take+"/cropped/"+filename+".jpg", function(e){
+          console.log("start crop " +file+' :: crop val:' + currentCamera.w +' / orig val: '+ currentCamera.w*width +' / rotate: '+currentCamera.rotate+' :: x: ' + currentCamera.x +' / y: '+ currentCamera.y)
+
+
+gm(localPath+"/"+take+"/originals/"+filename+".jpg").rotate('#fff',currentCamera.rotate*180 / Math.PI).crop(currentCamera.w*width,currentCamera.h*height,currentCamera.x*width,currentCamera.y*height).resize(640,640).write(localPath+"/"+take+"/cropped/"+filename+".jpg", function(e){
           if(!e){
-            console.log("writing video " +file)
+            console.log("writing frame " +file)
             cb()
           }else{//if(!e)
-            console.log("gm error!")
-            console.log(e)
+            console.log("gm error for frame" + file + " :: " + e)
             cb()
             //res.jsonp({"status":"error on gm"})
           }//endif(!e)

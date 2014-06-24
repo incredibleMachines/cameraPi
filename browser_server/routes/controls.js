@@ -193,6 +193,56 @@ exports.scanned = function(MongoDB,io){
 	}
 }
 
+exports.fakeScan = function(MongoDB, io){
+	return function(req,res){
+	var obj = {
+							participantCode: 'TESTING',
+							firstName: null,
+							lastName: null,
+							status: 'test',
+							timestamp: new Date()
+	}
+	
+
+
+		MongoDB.add('takes',obj,function(err,_take){
+			res.jsonp(_take)
+			
+										//init download app
+							http.get('http://'+DOWNLOAD_IP+':3001/init?take='+_take._id+'&method=armed&participant='+_take.participantCode,function(res){
+
+								res.on('data',function(data){
+									console.log('Received From Download: ')
+									console.log(data.toString())
+								})
+
+
+							}).on("error",function(e){
+								console.error("Could Not Connect to DownloadApp")
+								console.error(e)
+								server_error = true
+							})//http.get
+	
+			var cbCounter = 0;
+			var udpclient = dgram.createSocket("udp4");
+			var message = new Buffer("take "+_take._id+" "+_take.participantCode)
+			
+			udpclient.send(message,0,message.length, TRIGGER_PORT,TRIGGER_IP,function(err,bytes){
+				console.log("trigger message sent")
+				udpclient.close()
+			})
+			var udpclient2 = dgram.createSocket("udp4")
+			udpclient2.send(message,0,message.length,LIVECAPTURE_PORT, LIVECAPTURE_IP,function(err,bytes){
+				console.log('Live Capture message sent')
+				udpclient2.close()
+			})
+
+			io.sockets.emit('QRSCAN',{take_id: _take._id, participantCode: _take.participantCode, firstName: _take.firstName, lastName: _take.lastName})
+
+		})
+	}
+}
+
 exports.processed = function(MongoDB){
 	return function(req,res){
 		console.log("Processed Message!")
