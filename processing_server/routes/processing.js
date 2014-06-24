@@ -8,6 +8,7 @@ var async = require('async')
 var FFmpeg = require('fluent-ffmpeg')//ffmpeg inline commands in node
 var rimraf = require('rimraf')//recursive directory removal
 
+var AfterEffects = require('../modules/AfterEffects')
 //var net = require('net')
 
 var Take = require('../modules/take')
@@ -33,8 +34,20 @@ var duration =.1
 var framerate = 30
 var numJpgs = 0;
 
+var ae_queue = async.queue(function(data,callback){
+  AfterEffects.runScriptFunction(data.script,data.call,function(err,stdout){
+    console.error(err)
+    console.log(stdout)
+    callback()
+  })
+},1)
 
-var localPath =  "/Users/controlfreak/Desktop/cameraPi/processing_server/images"
+ae_queue.drain = function(){
+  console.log('ae_queue empty')
+}
+
+var localPath =  __dirname+"/../images"
+//var remotePath = '~/Desktop/chris'
 var remotePath =  "/Volumes/controlfreak/Desktop/cameraPi/download_server/images"
 
 // var localPath =  "/Users/IM_Laptop_01/Documents/cameraPi/processing_server/images"
@@ -49,60 +62,61 @@ exports.process = function(){
   return function(req,res){
     var take=req.param('take')
     var participant = req.param('participant')
-
-    console.log("begin processing on folder: "+localPath+"/"+take)
-    rimraf(localPath+"/"+take, function(e){
+    res.jsonp({take:take,participant:participant})
+    var folder = participant+"_"+take;
+    console.log("begin processing on folder: "+localPath+"/"+folder)
+    rimraf(localPath+"/"+folder, function(e){
       if(e) console.error(e)
       else{
-        fs.mkdir(localPath+"/"+take,function(_e){
+        fs.mkdir(localPath+"/"+folder,function(_e){
           console.log("making local take folder")
           if(e) console.error(_e)
           else{
-
-            fs.mkdir(localPath+"/"+take+"/originals",function(__e){
+            exec("cp -R "+remotePath+"/"+folder+"/ "+localPath+'/'+folder, function(err,stdout,stderr){
+              if(err)console.error("mv command error "+err)
+              if(stderr) console.error(stderr)
               console.log("making local originals folder")
               if(_e) console.error(__e)
               else{
-                exec("cp -R "+remotePath+"/"+take+"/ "+localPath+'/'+take+'/originals', function(err,stdout,stderr){
-                  if(err)console.error("mv command error "+err)
-                  if(stderr) console.error(stderr)
-
-                  fs.mkdir(localPath+"/"+take+"/cropped",function(){})
-                  fs.mkdir(localPath+"/"+take+"/warped",function(){})
-                  fs.mkdir(localPath+"/"+take+"/movs",function(){})
-                  fs.mkdir(localPath+"/"+take+"/renamed",function(){})
-                  fs.mkdir(localPath+"/"+take+"/output",function(){})
-
-                  fs.readdir(localPath+"/"+take+"/originals", function(err, files){
-                    //console.log("Processing: "+)
-                    var counter = 0
-                    console.log(files.length)
-                    Take.run(take,participant,files,deviceList,function(err,take){
-                      console.log("Finished Take: "+take)
-                      sendFinishToBrowser(take,participant)
-
+                var curl = "/usr/local/bin/curl -u controlfreak:cfs -O sftp://192.168.0.6/Users/controlfreak/Desktop/of_v0.8.1_osx_release/addons/ofxBlackmagic/nikeVideoRecorder/bin/data/"
+                console.log('curl exec')
+                exec("cd "+localPath+'/'+folder+" && "+curl+take+'.mov',function(error,stdout,stderr){
+                  if(error ) console.error(error)
+                  else{
+                    console.log(stdout)
+                    var body = ''
+                    http.get('http://'+BROWSER_IP+':3000/take/'+take,function(res){
+                      res.on('data',function(chunk){
+                        body+=chunk
+                      })
+                      res.on('end',complete)
+                      res.on('complete',complete)
+                    }).on('error',function(getErr){
+                      console.error('get Take JSON')
+                      console.error(getErr)
+                      //send back data to Browser to Update DB
                     })
-                      // queue.push(files,function(_err){
-                      //     counter++
-                      //     if(err) {
-                      //       console.log("push error")
-                      //       console.error(_err)
-                      //     }
-                      //     else console.log('finished queue item: '+ counter)
-                      // })//queue.push
+                    function complete(){
+                      //send back data to browser to update db
+                      console.log('GOT JSON')
+                      console.log(body)
 
-                      if(err){
-                        console.log(err)
-                      }
+                      var data = JSON.parse(body)
 
-                      else{
-                          console.log("filenumber: "+files)
-                          console.log("length: "+totalCams)
-                      }
-                    })//end fs read directory
-                  })//end exec cp
+                      var person = {firstName:data.firstName, lastName:data.lastName}
+                      var call = 'run('+JSON.stringify(person)+', "'+__dirname+'/../images/'+folder+'/'+take+'.mov" , "'+__dirname+'/../images/'+folder+'/'+folder+'.mov","'+folder+'")'
+                      var script = 'NikePhenomFastTrack.jsx'
+
+                      var obj = {call:call,script:script}
+                      ae_queue.push(obj)
+
+                    }
+                  }//end if error curl
+                })//end curl
+
               }//endif (__e)
-            })//fs.mkdir originals
+            })//end exec cp
+
           }//endif(_e)
         })//fs.mkdir take
       }//endif(e)

@@ -1,0 +1,34 @@
+<% /* SCENES SINGLE PAGE */ %>
+<% include includes/header %>
+
+<form id="camera-select" method="get" action="/cameras/select">
+	<select name="camera_id">
+		<option value="all"<% if(currentCamera=="all"){%><%= "selected" %><%}%> > all</option>
+		<% cameras.forEach(function(camera){ %>
+			<option value=<%= camera.camera_id %> <% if(camera.camera_id==currentCamera){ %> <%= "selected" %><%}%> >
+			<%= camera.camera_id %>
+		<%}) /* end for each */%>
+	</select>
+	<input type="submit" value="Change Camera">
+</form>
+
+<% for (var i=0;i<settings.length;i++){ %>
+	<form id= "camera-settings" method="post" action="/set">
+		<strong><%= settings[i].name %></strong>
+			<% if(settings[i].options){ %>
+				<select name= <%= settings[i].call %> >
+					<% for (var j=0;j<settings[i].options.length;j++){%>
+					  <option value=<%=j%> <%if (j==settings[i].value) { %> <%="selected"%> <% } %> >
+					  	<%= settings[i].options[j].name %>
+						</option>
+				<% }/*endif*/
+					}/*end for*/ %>
+				</select>
+		<% if(i<5||i>8){%>
+			<input type="submit" value="Update">
+		<% }else{ %>
+			<strong><%= settings[i].value %></strong>
+		<% } %>
+	</form>
+<% } %>
+<% include includes/footer %>
